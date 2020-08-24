@@ -1,0 +1,21 @@
+apiVersion: release/v1
+kind: Release
+metadata:
+  name: eksctl
+  web: https://eksctl.io/
+spec:
+  url: https://github.com/weaveworks/eksctl/releases/download/{{ release }}/
+  file:
+    name: eksctl_{{ os }}_{{ arch }}.tar.gz
+    binaryPath: eksctl
+    type:
+      - os: linux
+        arch: amd64
+      - os: darwin
+        arch: amd64
+      - os: windows
+        arch: amd64
+  checksum:
+    url: https://github.com/weaveworks/eksctl/releases/download/{{ release }}/
+    file: eksctl_checksums.txt
+    format: sha256

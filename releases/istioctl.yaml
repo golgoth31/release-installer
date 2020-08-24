@@ -1,0 +1,21 @@
+apiVersion: release/v1
+kind: Release
+metadata:
+  name: istioctl
+  web: https://istio.io/
+spec:
+  url: https://github.com/istio/istio/releases/download/{{ release }}/
+  file:
+    name: istioctl-{{ release }}-{{ os }}-{{ arch }}.tar.gz
+    binaryPath: istioctl
+    type:
+      - os: linux
+        arch: amd64
+      - os: darwin
+        arch: amd64
+      - os: windows
+        arch: amd64
+  checksum:
+    url: https://github.com/istio/istio/releases/download/{{ release }}/
+    file: istioctl-{{ release }}-{{ os }}-{{ arch }}.tar.gz.sha256
+    format: sha256

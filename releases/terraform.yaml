@@ -1,0 +1,14 @@
+apiVersion: release/v1
+kind: Release
+metadata:
+  name: terraform
+  web: https://terraform.io/
+spec:
+  url: https://releases.hashicorp.com/terraform/{{ release }}/
+  file:
+    name: terraform_{{ release }}_{{ os }}_{{ arch }}.zip
+    binaryPath: terraform
+  checksum:
+    url: https://releases.hashicorp.com/terraform/{{ release }}/
+    file: terraform_{{ release }}_SHA256SUMS
+    format: sha256
