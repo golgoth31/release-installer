@@ -105,29 +105,23 @@ func initConfig() {
 
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
 	output.FormatLevel = func(i interface{}) string {
-		temp := strings.ToUpper(Sprintf("%-6s", i))
+		temp := strings.ToUpper(fmt.Sprintf("%s", i))
 		level := ""
 		switch i {
 		case "debug":
-			level = Sprintf("| %-6s|", Cyan(temp))
+			level = Sprintf(Cyan(temp))
 		case "info":
-			level = Sprintf("| %-6s|", Green(temp))
+			level = Sprintf(Green(temp))
 		case "warning":
-			level = Sprintf("| %-6s|", Yellow(i))
+			level = Sprintf(Yellow(temp))
 		case "error":
-			level = Sprintf("| %-6s|", Red(i))
+			level = Sprintf(Red(temp))
 		case "fatal":
-			level = Sprintf("| %-6s|", Red(i))
+			level = Sprintf(Red(temp))
 		}
 		return level
 	}
 	output.FormatMessage = func(i interface{}) string {
-		return fmt.Sprintf("%s", i)
-	}
-	output.FormatFieldName = func(i interface{}) string {
-		return fmt.Sprintf("%s:", i)
-	}
-	output.FormatFieldValue = func(i interface{}) string {
 		return fmt.Sprintf("%s", i)
 	}
 	newLog := zerolog.New(output)

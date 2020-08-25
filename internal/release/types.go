@@ -1,7 +1,7 @@
 package release
 
 type Release struct {
-	ApiVersion string `yaml:"apiVersion"`
+	ApiVersion string `json:"apiVersion"`
 	Kind       string
 	Metadata   Metadata
 	Spec       Spec

@@ -6,3 +6,4 @@ spec:
   release: 0.13.0
   os: linux
   arch: amd64
+  default: true

@@ -4,11 +4,11 @@ metadata:
   name: terraform
   web: https://terraform.io/
 spec:
-  url: https://releases.hashicorp.com/terraform/{{ release }}/
+  url: https://releases.hashicorp.com/terraform/{{ .Version }}
   file:
-    name: terraform_{{ release }}_{{ os }}_{{ arch }}.zip
+    name: terraform_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip
     binaryPath: terraform
   checksum:
-    url: https://releases.hashicorp.com/terraform/{{ release }}/
-    file: terraform_{{ release }}_SHA256SUMS
+    url: https://releases.hashicorp.com/terraform/{{ .Version }}
+    file: terraform_{{ .Version }}_SHA256SUMS
     format: sha256

@@ -17,8 +17,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/golgoth31/release-installer/internal/install"
+	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // installCmd represents the install command
@@ -32,9 +36,13 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		inst := install.NewInstall()
-		inst.LoadYaml()
-
+		rel, _ := cmd.Flags().GetString("release")
+		inst := install.NewInstall(rel)
+		if err := viper.Unmarshal(inst); err != nil {
+			logger.Logger.Fatal().Err(err).Msg("Failed unmarshal to install")
+		}
+		inst.Download()
+		fmt.Println(inst.ApiVersion)
 	},
 }
 
@@ -46,9 +54,20 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	installCmd.PersistentFlags().StringP("os", "o", "", "A help for foo")
+	installCmd.MarkPersistentFlagRequired("os")
+	viper.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os"))
 	installCmd.PersistentFlags().StringP("arch", "a", "", "A help for foo")
-	installCmd.PersistentFlags().StringP("release", "r", "", "A help for foo")
+	installCmd.MarkPersistentFlagRequired("arch")
+	viper.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch"))
+	installCmd.PersistentFlags().StringP("version", "v", "", "A help for foo")
+	installCmd.MarkPersistentFlagRequired("version")
+	viper.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version"))
 	installCmd.PersistentFlags().StringP("path", "p", "", "A help for foo")
+	installCmd.MarkPersistentFlagRequired("path")
+	viper.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path"))
+	installCmd.PersistentFlags().StringP("release", "r", "", "A help for foo")
+	installCmd.MarkPersistentFlagRequired("release")
+	viper.BindPFlag("metadata.release", installCmd.PersistentFlags().Lookup("release"))
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

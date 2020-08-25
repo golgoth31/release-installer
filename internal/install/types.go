@@ -8,11 +8,13 @@ type Install struct {
 }
 
 type Metadata struct {
-	Name string `json:"name"`
+	Release string `json:"release"`
 }
 
 type Spec struct {
-	Release string `json:"release"`
+	Version string `json:"version"`
 	Os      string `json:"os"`
 	Arch    string `json:"arch"`
+	Default bool   `json:"default"`
+	Path    string `json:"path"`
 }
