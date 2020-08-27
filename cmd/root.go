@@ -19,20 +19,16 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
-	"time"
 
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/rs/zerolog"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	. "github.com/logrusorgru/aurora"
+	// . "github.com/logrusorgru/aurora"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
-var log zerolog.Logger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -92,38 +88,19 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
+	log.SetFormatter(
+		&log.TextFormatter{
+			DisableTimestamp: true,
+		},
+	)
 	logLevel, err := rootCmd.Flags().GetBool("debug")
 	if err != nil {
-		log.Fatal().Err(err).Msg("")
+		log.Fatal()
 	}
 
 	if logLevel {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.SetLevel(log.DebugLevel)
 	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		log.SetLevel(log.InfoLevel)
 	}
-
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
-	output.FormatLevel = func(i interface{}) string {
-		temp := strings.ToUpper(fmt.Sprintf("%s", i))
-		level := ""
-		switch i {
-		case "debug":
-			level = Sprintf(Cyan(temp))
-		case "info":
-			level = Sprintf(Green(temp))
-		case "warning":
-			level = Sprintf(Yellow(temp))
-		case "error":
-			level = Sprintf(Red(temp))
-		case "fatal":
-			level = Sprintf(Red(temp))
-		}
-		return level
-	}
-	output.FormatMessage = func(i interface{}) string {
-		return fmt.Sprintf("%s", i)
-	}
-	newLog := zerolog.New(output)
-	logger.SetLogger(&newLog)
 }

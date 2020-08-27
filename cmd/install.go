@@ -20,7 +20,8 @@ import (
 	"fmt"
 
 	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -39,8 +40,9 @@ to quickly create a Cobra application.`,
 		rel, _ := cmd.Flags().GetString("release")
 		inst := install.NewInstall(rel)
 		if err := viper.Unmarshal(inst); err != nil {
-			logger.Logger.Fatal().Err(err).Msg("Failed unmarshal to install")
+			log.Fatal("Failed unmarshal to install")
 		}
+
 		inst.Download()
 		fmt.Println(inst.ApiVersion)
 	},

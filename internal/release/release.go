@@ -3,7 +3,7 @@ package release
 import (
 	"fmt"
 
-	"github.com/golgoth31/release-installer/internal/log"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -18,13 +18,13 @@ func loadYaml(file string) *Release {
 	yamlData.SetConfigFile(fmt.Sprintf("releases/%s.yaml", file))
 
 	if err := yamlData.ReadInConfig(); err != nil {
-		log.Logger.Fatal().Err(err).Msgf("Failed to read %s", file)
+		log.Fatalf("Failed to read %s", file)
 	}
 
 	r := &Release{}
 	err := yamlData.Unmarshal(r)
 	if err != nil {
-		log.Logger.Fatal().Err(err).Msg("unable to decode into release struct")
+		log.Fatal("unable to decode into release struct")
 	}
 	return r
 }
