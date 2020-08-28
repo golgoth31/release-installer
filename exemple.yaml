@@ -1,4 +1,4 @@
-apiVersion: release/v1
+apiVersion: install/v1
 kind: Install
 metadata:
   name: terraform
@@ -7,3 +7,6 @@ spec:
   os: linux
   arch: amd64
   default: true
+  checksum:
+    hash:
+    value:

@@ -6,8 +6,9 @@ metadata:
 spec:
   url: https://github.com/weaveworks/eksctl/releases/download/{{ release }}/
   file:
-    name: eksctl_{{ os }}_{{ arch }}.tar.gz
-    binaryPath: eksctl
+    archive: eksctl_{{ os }}_{{ arch }}.tar.gz
+    binaryPath: "."
+    binary: eksctl
     type:
       - os: linux
         arch: amd64

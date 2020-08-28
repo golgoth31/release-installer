@@ -1,5 +1,10 @@
 package install
 
+import (
+	"io"
+	"sync"
+)
+
 type Install struct {
 	ApiVersion string   `json:"apiVersion"`
 	Kind       string   `json:"kind"`
@@ -17,4 +22,14 @@ type Spec struct {
 	Arch    string `json:"arch"`
 	Default bool   `json:"default"`
 	Path    string `json:"path"`
+}
+
+type progressBar struct {
+	// lock everything below
+	lock sync.Mutex
+}
+
+type readCloser struct {
+	io.Reader
+	close func() error
 }

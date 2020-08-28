@@ -3,6 +3,7 @@ module github.com/golgoth31/release-installer
 go 1.14
 
 require (
+	github.com/hashicorp/go-getter v1.4.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.2.0
 	github.com/spf13/cobra v1.0.0

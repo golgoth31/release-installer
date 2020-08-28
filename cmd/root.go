@@ -57,15 +57,8 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.release-installer.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.PersistentFlags().BoolP("debug", "d", false, "debug")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.release-installer/.release-installer.yaml)")
+	rootCmd.PersistentFlags().Bool("debug", false, "debug")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -82,7 +75,7 @@ func initConfig() {
 		}
 
 		// Search config in home directory with name ".release-installer" (without extension).
-		viper.AddConfigPath(home)
+		viper.AddConfigPath(home + "/.release-installer")
 		viper.SetConfigName(".release-installer")
 	}
 

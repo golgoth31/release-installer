@@ -19,7 +19,8 @@ type Spec struct {
 }
 
 type File struct {
-	Name       string
+	Archive    string
+	Binary     string
 	BinaryPath string
 }
 

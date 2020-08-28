@@ -38,40 +38,50 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		rel, _ := cmd.Flags().GetString("release")
+
 		inst := install.NewInstall(rel)
 		if err := viper.Unmarshal(inst); err != nil {
 			log.Fatal("Failed unmarshal to install")
 		}
+		log.Debugf("Default value: %v", viper.GetBool("default"))
+		log.Debugf("Default value: %v", viper.GetBool("spec.default"))
 
-		inst.Download()
-		fmt.Println(inst.ApiVersion)
+		log.Infof("Installing release \"%s\" in \"%s\" with values:", rel, inst.Spec.Path)
+		fmt.Printf("Version: %s\n", inst.Spec.Version)
+		fmt.Printf("OS: %s\n", inst.Spec.Os)
+		fmt.Printf("Arch: %s\n", inst.Spec.Arch)
+		fmt.Printf("Default: %v\n", inst.Spec.Default)
+		fmt.Println()
+
+		inst.Install()
+
+		log.Info("Release installed")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(installCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
 	installCmd.PersistentFlags().StringP("os", "o", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("os")
 	viper.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os"))
+
 	installCmd.PersistentFlags().StringP("arch", "a", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("arch")
 	viper.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch"))
+
 	installCmd.PersistentFlags().StringP("version", "v", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("version")
 	viper.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version"))
-	installCmd.PersistentFlags().StringP("path", "p", "", "A help for foo")
+
+	installCmd.PersistentFlags().StringP("path", "p", "", "Destination to install file in, should set in your \"$PATH\"")
 	installCmd.MarkPersistentFlagRequired("path")
 	viper.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path"))
+
 	installCmd.PersistentFlags().StringP("release", "r", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("release")
 	viper.BindPFlag("metadata.release", installCmd.PersistentFlags().Lookup("release"))
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// installCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	installCmd.PersistentFlags().BoolP("default", "d", false, "Set this install as default")
+	viper.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default"))
 }
