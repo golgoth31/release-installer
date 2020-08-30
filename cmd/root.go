@@ -20,10 +20,12 @@ import (
 	"fmt"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"github.com/spf13/cobra"
 
-	// . "github.com/logrusorgru/aurora"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
@@ -81,19 +83,16 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	log.SetFormatter(
-		&log.TextFormatter{
-			DisableTimestamp: true,
-		},
-	)
 	logLevel, err := rootCmd.Flags().GetBool("debug")
 	if err != nil {
-		log.Fatal()
+		log.Fatal().Err(err).Msg("")
 	}
 
 	if logLevel {
-		log.SetLevel(log.DebugLevel)
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	} else {
-		log.SetLevel(log.InfoLevel)
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
+
+	logger.Initialize()
 }

@@ -7,14 +7,8 @@ spec:
   url: https://github.com/istio/istio/releases/download/{{ .Version }}
   file:
     name: istioctl-{{ .Version }}-{{ .Os }}-{{ .Arch }}.tar.gz
-    binaryPath: istioctl
-    type:
-      - os: linux
-        arch: amd64
-      - os: darwin
-        arch: amd64
-      - os: windows
-        arch: amd64
+    binaryPath: "."
+    binary: istioctl
   checksum:
     url: https://github.com/istio/istio/releases/download/{{ .Version }}
     file: istioctl-{{ .Version }}-{{ .Os }}-{{ .Arch }}.tar.gz.sha256

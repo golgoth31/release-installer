@@ -20,11 +20,15 @@ import (
 	"fmt"
 
 	"github.com/golgoth31/release-installer/internal/install"
-	log "github.com/sirupsen/logrus"
+	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/golgoth31/release-installer/internal/output"
+	"github.com/logrusorgru/aurora"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var out output.Output
 
 // installCmd represents the install command
 var installCmd = &cobra.Command{
@@ -41,21 +45,39 @@ to quickly create a Cobra application.`,
 
 		inst := install.NewInstall(rel)
 		if err := viper.Unmarshal(inst); err != nil {
-			log.Fatal("Failed unmarshal to install")
+			logger.StdLog.Fatal().Msg("Failed unmarshal to install")
 		}
-		log.Debugf("Default value: %v", viper.GetBool("default"))
-		log.Debugf("Default value: %v", viper.GetBool("spec.default"))
+		logger.StdLog.Debug().Msgf("Default value: %v", viper.GetBool("default"))
+		logger.StdLog.Debug().Msgf("Default value: %v", viper.GetBool("spec.default"))
 
-		log.Infof("Installing release \"%s\" in \"%s\" with values:", rel, inst.Spec.Path)
-		fmt.Printf("Version: %s\n", inst.Spec.Version)
-		fmt.Printf("OS: %s\n", inst.Spec.Os)
-		fmt.Printf("Arch: %s\n", inst.Spec.Arch)
-		fmt.Printf("Default: %v\n", inst.Spec.Default)
+		fmt.Println()
+
+		out.StepTitle(fmt.Sprintf("Installing release \"%s\"", rel))
+
+		fmt.Println()
+
+		logger.StdLog.Info().Msgf("Version: %s", inst.Spec.Version)
+		logger.StdLog.Info().Msgf("OS:      %s", inst.Spec.Os)
+		logger.StdLog.Info().Msgf("Arch:    %s", inst.Spec.Arch)
+		logger.StdLog.Info().Msgf("Default: %t", inst.Spec.Default)
+		logger.StdLog.Info().Msgf("Path:    %s", inst.Spec.Path)
+
 		fmt.Println()
 
 		inst.Install()
 
-		log.Info("Release installed")
+		fmt.Println()
+		fmt.Printf(" %v", aurora.Bold(logger.OkStatus()))
+		out.StepTitle(
+			"Release installed",
+		)
+		// out.StepTitle(
+		// 	fmt.Sprintf(
+		// 		"%s Release installed %s",
+		// 		logger.OkStatus(),
+		// 		logger.OkStatus(),
+		// 	),
+		// )
 	},
 }
 
