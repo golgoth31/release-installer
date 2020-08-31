@@ -29,6 +29,7 @@ import (
 )
 
 var out output.Output
+var installConfig *viper.Viper
 
 // installCmd represents the install command
 var installCmd = &cobra.Command{
@@ -44,24 +45,18 @@ to quickly create a Cobra application.`,
 		rel, _ := cmd.Flags().GetString("release")
 
 		inst := install.NewInstall(rel)
-		if err := viper.Unmarshal(inst); err != nil {
+		if err := installConfig.Unmarshal(inst); err != nil {
 			logger.StdLog.Fatal().Msg("Failed unmarshal to install")
 		}
-		logger.StdLog.Debug().Msgf("Default value: %v", viper.GetBool("default"))
-		logger.StdLog.Debug().Msgf("Default value: %v", viper.GetBool("spec.default"))
 
 		fmt.Println()
-
 		out.StepTitle(fmt.Sprintf("Installing release \"%s\"", rel))
-
 		fmt.Println()
-
 		logger.StdLog.Info().Msgf("Version: %s", inst.Spec.Version)
 		logger.StdLog.Info().Msgf("OS:      %s", inst.Spec.Os)
 		logger.StdLog.Info().Msgf("Arch:    %s", inst.Spec.Arch)
 		logger.StdLog.Info().Msgf("Default: %t", inst.Spec.Default)
 		logger.StdLog.Info().Msgf("Path:    %s", inst.Spec.Path)
-
 		fmt.Println()
 
 		inst.Install()
@@ -71,39 +66,33 @@ to quickly create a Cobra application.`,
 		out.StepTitle(
 			"Release installed",
 		)
-		// out.StepTitle(
-		// 	fmt.Sprintf(
-		// 		"%s Release installed %s",
-		// 		logger.OkStatus(),
-		// 		logger.OkStatus(),
-		// 	),
-		// )
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(installCmd)
+	installConfig = viper.New()
 
 	installCmd.PersistentFlags().StringP("os", "o", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("os")
-	viper.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os"))
+	installConfig.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os"))
 
 	installCmd.PersistentFlags().StringP("arch", "a", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("arch")
-	viper.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch"))
+	installConfig.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch"))
 
 	installCmd.PersistentFlags().StringP("version", "v", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("version")
-	viper.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version"))
+	installConfig.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version"))
 
 	installCmd.PersistentFlags().StringP("path", "p", "", "Destination to install file in, should set in your \"$PATH\"")
 	installCmd.MarkPersistentFlagRequired("path")
-	viper.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path"))
+	installConfig.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path"))
 
 	installCmd.PersistentFlags().StringP("release", "r", "", "A help for foo")
 	installCmd.MarkPersistentFlagRequired("release")
-	viper.BindPFlag("metadata.release", installCmd.PersistentFlags().Lookup("release"))
+	installConfig.BindPFlag("metadata.release", installCmd.PersistentFlags().Lookup("release"))
 
 	installCmd.PersistentFlags().BoolP("default", "d", false, "Set this install as default")
-	viper.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default"))
+	installConfig.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default"))
 }

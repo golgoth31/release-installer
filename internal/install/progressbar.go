@@ -17,7 +17,7 @@ func (cpb *progressBar) TrackProgress(src string, currentSize, totalSize int64, 
 	bar := pb.AddBar(totalSize,
 		mpb.PrependDecorators(
 			decor.OnComplete(
-				decor.Name(logger.LineStart()), logger.OkStatus(),
+				decor.Name(logger.InfoStatus()), logger.OkStatus(),
 			),
 		),
 		mpb.AppendDecorators(
@@ -26,23 +26,6 @@ func (cpb *progressBar) TrackProgress(src string, currentSize, totalSize int64, 
 			decor.AverageSpeed(decor.UnitKB, "(% .2f)"),
 		),
 	)
-	// bar := pb.AddBar(totalSize,
-	// 	mpb.PrependDecorators(
-	// 		decor.Name(src),
-	// 		decor.Name(" "),
-	// 		decor.CountersKiloByte("% .2f / % .2f "),
-	// 		decor.AverageSpeed(decor.UnitKB, "(% .2f)"),
-	// 	),
-	// 	mpb.AppendDecorators(
-	// 		decor.Percentage(),
-	// 		decor.Name(" - "),
-	// 		decor.Elapsed(decor.ET_STYLE_GO, decor.WC{W: 4}),
-	// 		decor.Name(" - "),
-	// 		decor.OnComplete(
-	// 			decor.AverageETA(decor.ET_STYLE_GO, decor.WC{W: 4}), "done",
-	// 		),
-	// 	),
-	// )
 
 	reader := bar.ProxyReader(stream)
 

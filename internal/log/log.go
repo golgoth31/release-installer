@@ -16,6 +16,9 @@ var StepLog zerolog.Logger
 func OkStatus() string {
 	return fmt.Sprint(aurora.Green("\u221A")) // √
 }
+func DebugStatus() string {
+	return fmt.Sprint(aurora.White("\u25CC")) // √
+}
 
 func WarnStatus() string {
 	return fmt.Sprint(aurora.Yellow("\u26A0"))
@@ -29,7 +32,7 @@ func FatalStatus() string {
 	return fmt.Sprint(aurora.Red("\u2620")) // ×
 }
 
-func LineStart() string {
+func InfoStatus() string {
 	return fmt.Sprint(aurora.Blue("\u00BB")) // ×
 }
 
@@ -40,9 +43,9 @@ func Initialize() {
 		var level string
 		switch i {
 		case "debug":
-			level = ErrorStatus()
+			level = DebugStatus()
 		case "info":
-			level = LineStart()
+			level = InfoStatus()
 		case "warning":
 			level = WarnStatus()
 		case "error":

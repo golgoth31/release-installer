@@ -66,7 +66,6 @@ func (i *Install) templates() (
 func (i *Install) Install() {
 
 	// define getter opts
-	opts := []getter.ClientOption{}
 	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
 	file := link + "_" + i.Spec.Version
 
@@ -104,6 +103,7 @@ func (i *Install) Install() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	// Build the client
+	opts := []getter.ClientOption{}
 	opts = append(opts, getter.WithProgress(defaultProgressBar))
 	client := &getter.Client{
 		Ctx:     ctx,
