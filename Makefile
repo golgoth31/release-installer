@@ -47,10 +47,10 @@ build_arm64:
 build_armv7:
 	docker build $(DOCKER_BUILD_ARGS) $(DOCKER_ARMV7_ARGS) -t golgoth31/ri:$(APP_VERSION) -f ./build/Dockerfile .
 lint:
-ifndef GOLINTER
-	GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.24
-endif
-	golangci-lint run
+# ifndef GOLINTER
+# 	GO111MODULE=on go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.24
+# endif
+# 	golangci-lint run
 
 artifact_linux_amd64:
 	GOARCH=amd64 GOPROXY=https://proxy.golang.org CGO_ENABLED=0 GOOS=linux go build -ldflags '${LDFLAGS}' -o ri-linux-amd64
