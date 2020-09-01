@@ -5,8 +5,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// NewInstall ...
 func NewInstall(rel string) *Install {
 	yamlData = viper.New()
 	releaseData = release.New(rel)
-	return &Install{ApiVersion: "release/v1", Kind: "Install"}
+
+	return &Install{APIVersion: "release/v1", Kind: "Install"}
 }

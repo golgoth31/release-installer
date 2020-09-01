@@ -1,19 +1,3 @@
-/*
-Copyright © 2020 David Sabatie <david.sabatie@notrenet.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
 package cmd
 
 import (
@@ -28,10 +12,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-var out output.Output
-var installConfig *viper.Viper
+var (
+	out           output.Output
+	installConfig *viper.Viper
+)
 
-// installCmd represents the install command
+// installCmd represents the install command.
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "A brief description of your command",
@@ -42,11 +28,14 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		rel, _ := cmd.Flags().GetString("release")
+		rel, err := cmd.Flags().GetString("release")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
 
 		inst := install.NewInstall(rel)
 		if err := installConfig.Unmarshal(inst); err != nil {
-			logger.StdLog.Fatal().Msg("Failed unmarshal to install")
+			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
 		fmt.Println()
@@ -71,28 +60,62 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(installCmd)
+
 	installConfig = viper.New()
 
 	installCmd.PersistentFlags().StringP("os", "o", "", "A help for foo")
-	installCmd.MarkPersistentFlagRequired("os")
-	installConfig.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os"))
+
+	if err := installCmd.MarkPersistentFlagRequired("os"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	if err := installConfig.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 
 	installCmd.PersistentFlags().StringP("arch", "a", "", "A help for foo")
-	installCmd.MarkPersistentFlagRequired("arch")
-	installConfig.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch"))
+
+	if err := installCmd.MarkPersistentFlagRequired("arch"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	if err := installConfig.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 
 	installCmd.PersistentFlags().StringP("version", "v", "", "A help for foo")
-	installCmd.MarkPersistentFlagRequired("version")
-	installConfig.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version"))
+
+	if err := installCmd.MarkPersistentFlagRequired("version"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	if err := installConfig.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 
 	installCmd.PersistentFlags().StringP("path", "p", "", "Destination to install file in, should set in your \"$PATH\"")
-	installCmd.MarkPersistentFlagRequired("path")
-	installConfig.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path"))
+
+	if err := installCmd.MarkPersistentFlagRequired("path"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	if err := installConfig.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 
 	installCmd.PersistentFlags().StringP("release", "r", "", "A help for foo")
-	installCmd.MarkPersistentFlagRequired("release")
-	installConfig.BindPFlag("metadata.release", installCmd.PersistentFlags().Lookup("release"))
+
+	if err := installCmd.MarkPersistentFlagRequired("release"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	if err := installConfig.BindPFlag("metadata.release", installCmd.PersistentFlags().Lookup("release")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 
 	installCmd.PersistentFlags().BoolP("default", "d", false, "Set this install as default")
-	installConfig.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default"))
+
+	if err := installConfig.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 }

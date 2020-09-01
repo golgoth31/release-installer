@@ -9,38 +9,48 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// Logger ...
+// StdLog ...
 var StdLog zerolog.Logger
+
+// StepLog ...
 var StepLog zerolog.Logger
 
+// OkStatus ...
 func OkStatus() string {
 	return fmt.Sprint(aurora.Green("\u221A")) // √
 }
+
+// DebugStatus ...
 func DebugStatus() string {
 	return fmt.Sprint(aurora.White("\u25CC")) // √
 }
 
+// WarnStatus ...
 func WarnStatus() string {
 	return fmt.Sprint(aurora.Yellow("\u26A0"))
 }
 
+// ErrorStatus ...
 func ErrorStatus() string {
 	return fmt.Sprint(aurora.Red("\u274C")) // ×
 }
 
+// FatalStatus ...
 func FatalStatus() string {
 	return fmt.Sprint(aurora.Red("\u2620")) // ×
 }
 
+// InfoStatus ...
 func InfoStatus() string {
 	return fmt.Sprint(aurora.Blue("\u00BB")) // ×
 }
 
-// SetLogger ...
+// Initialize ...
 func Initialize() {
 	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout}
 	stdOutput.FormatLevel = func(i interface{}) string {
 		var level string
+
 		switch i {
 		case "debug":
 			level = DebugStatus()
@@ -53,6 +63,7 @@ func Initialize() {
 		case "fatal":
 			level = FatalStatus()
 		}
+
 		return level
 	}
 	stdOutput.FormatTimestamp = func(i interface{}) string {
@@ -68,5 +79,4 @@ func Initialize() {
 		return ""
 	}
 	StepLog = zerolog.New(stepOutput)
-
 }

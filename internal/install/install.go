@@ -1,3 +1,4 @@
+// Package install ...
 package install
 
 import (
@@ -15,12 +16,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-var yamlData *viper.Viper
-var releaseData *release.Release
-var defaultProgressBar getter.ProgressTracker = &progressBar{}
+var (
+	yamlData           *viper.Viper
+	releaseData        *release.Release
+	defaultProgressBar getter.ProgressTracker = &progressBar{}
+	out                output.Output
+)
 
-var out output.Output
-
+// LoadYaml ...
 func (i *Install) LoadYaml(file string) {
 	yamlData.SetConfigType("yaml")
 	yamlData.SetConfigFile(file)
@@ -30,13 +33,14 @@ func (i *Install) LoadYaml(file string) {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }
+
 func (i *Install) templates() (
 	releaseURL bytes.Buffer,
 	releaseFileName bytes.Buffer,
 	checksumURL bytes.Buffer,
 	checksumFileName bytes.Buffer) {
 	// template strings
-	treleaseURL := template.Must(template.New("releaseURL").Parse(releaseData.Spec.Url))
+	treleaseURL := template.Must(template.New("releaseURL").Parse(releaseData.Spec.URL))
 	if err := treleaseURL.Execute(&releaseURL, i.Spec); err != nil {
 		// out.Status(out.FatalStatus(), "Error templating release URL")
 		logger.StdLog.Fatal().Err(err).Msg("")
@@ -48,7 +52,7 @@ func (i *Install) templates() (
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	tchecksumURL := template.Must(template.New("checksumURL").Parse(releaseData.Spec.Checksum.Url))
+	tchecksumURL := template.Must(template.New("checksumURL").Parse(releaseData.Spec.Checksum.URL))
 	if err := tchecksumURL.Execute(&checksumURL, i.Spec); err != nil {
 		// out.Status(out.FatalStatus(), "Error templating checksum URL")
 		logger.StdLog.Fatal().Err(err).Msg("")
@@ -63,8 +67,8 @@ func (i *Install) templates() (
 	return releaseURL, releaseFileName, checksumURL, checksumFileName
 }
 
+// Install ...
 func (i *Install) Install() {
-
 	// define getter opts
 	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
 	file := link + "_" + i.Spec.Version
@@ -119,7 +123,7 @@ func (i *Install) Install() {
 	}
 
 	// ensure the binary is executable
-	if err := os.Chmod(file, 0755); err != nil {
+	if err := os.Chmod(file, 0o750); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
@@ -128,15 +132,18 @@ func (i *Install) Install() {
 
 	if i.Spec.Default {
 		logger.StdLog.Info().Msgf("Creating symlink: %s", link)
+
 		_, err := os.Stat(link)
 		if err == nil {
 			if err := os.Remove(link); err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
 			}
 		}
+
 		if err := os.Symlink(file, link); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
+
 		logger.StdLog.Info().Msgf("Done")
 	}
 }

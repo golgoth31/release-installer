@@ -5,17 +5,20 @@ import (
 	"sync"
 )
 
+// Install ...
 type Install struct {
-	ApiVersion string   `json:"apiVersion"`
+	APIVersion string   `json:"apiVersion"`
 	Kind       string   `json:"kind"`
 	Metadata   Metadata `json:"metadata"`
 	Spec       Spec     `json:"spec"`
 }
 
+// Metadata ...
 type Metadata struct {
 	Release string `json:"release"`
 }
 
+// Spec ...
 type Spec struct {
 	Version string `json:"version"`
 	Os      string `json:"os"`

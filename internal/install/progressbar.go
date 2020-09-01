@@ -8,11 +8,13 @@ import (
 	"github.com/vbauerster/mpb/v5/decor"
 )
 
+const pbWidth = 200
+
 func (cpb *progressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
 	cpb.lock.Lock()
 	defer cpb.lock.Unlock()
 
-	pb := mpb.New(mpb.WithWidth(60))
+	pb := mpb.New(mpb.WithWidth(pbWidth))
 	// Parameters of th new progress bar
 	bar := pb.AddBar(totalSize,
 		mpb.PrependDecorators(

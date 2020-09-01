@@ -1,3 +1,4 @@
+// Package output ...
 package output
 
 import (
@@ -5,6 +6,7 @@ import (
 	"github.com/logrusorgru/aurora/v3"
 )
 
+// StepTitle ...
 func (o *Output) StepTitle(str string) {
 	logger.StepLog.Error().Msgf(" %v", aurora.Bold(str).Underline())
 }
