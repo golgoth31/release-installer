@@ -1,0 +1,12 @@
+apiVersion: install/v1
+kind: Install
+metadata:
+  name: terraform
+spec:
+  release: 0.13.0
+  os: linux
+  arch: amd64
+  default: true
+  checksum:
+    hash:
+    value:
