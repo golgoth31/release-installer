@@ -128,7 +128,7 @@ func (i *Install) Install() {
 	}
 
 	fmt.Println()
-	logger.StdLog.Info().Msgf("File saved as: %s", file)
+	logger.SuccessLog.Info().Msgf("File saved as: %s", file)
 
 	if i.Spec.Default {
 		logger.StdLog.Info().Msgf("Creating symlink: %s", link)
@@ -144,6 +144,6 @@ func (i *Install) Install() {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		logger.StdLog.Info().Msgf("Done")
+		logger.SuccessLog.Info().Msgf("Done")
 	}
 }

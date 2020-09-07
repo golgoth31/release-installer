@@ -4,7 +4,7 @@ package release
 import (
 	"fmt"
 
-	log "github.com/sirupsen/logrus"
+	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/viper"
 )
 
@@ -17,17 +17,23 @@ func New(rel string) *Release {
 }
 
 func loadYaml(file string) *Release {
+	releasePath := fmt.Sprintf(
+		"%s/%s",
+		viper.GetString("homedir"),
+		viper.GetString("releases.dir"),
+	)
+
 	yamlData.SetConfigType("yaml") // or viper.SetConfigType("YAML")
-	yamlData.SetConfigFile(fmt.Sprintf("releases/%s.yaml", file))
+	yamlData.SetConfigFile(fmt.Sprintf("%s/%s.yaml", releasePath, file))
 
 	if err := yamlData.ReadInConfig(); err != nil {
-		log.Fatalf("Failed to read %s", file)
+		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
 	r := &Release{}
 
 	if err := yamlData.Unmarshal(r); err != nil {
-		log.Fatal("unable to decode into release struct")
+		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
 	return r

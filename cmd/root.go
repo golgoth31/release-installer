@@ -92,9 +92,12 @@ func initConfig() {
 	} else {
 		logger.StdLog.Debug().Msg("Config file not found, saving default")
 
-		if err := os.Mkdir(homedir, 0o750); err != nil {
+		if err := os.Mkdir(homedir, 0750); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
+		viper.SetDefault("homedir", homedir)
+		viper.SetDefault("releases.dir", "releases")
+		viper.SetDefault("releases.git", "https://github.com/golgoth31/release-installer-definitions.git")
 		if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}

@@ -15,6 +15,9 @@ var StdLog zerolog.Logger
 // StepLog ...
 var StepLog zerolog.Logger
 
+// SuccessLog ...
+var SuccessLog zerolog.Logger
+
 // OkStatus ...
 func OkStatus() string {
 	return fmt.Sprint(aurora.Green("\u221A")) // √
@@ -79,4 +82,13 @@ func Initialize() {
 		return ""
 	}
 	StepLog = zerolog.New(stepOutput)
+
+	successOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	successOutput.FormatLevel = func(i interface{}) string {
+		return OkStatus()
+	}
+	successOutput.FormatTimestamp = func(i interface{}) string {
+		return ""
+	}
+	SuccessLog = zerolog.New(successOutput)
 }
