@@ -6,7 +6,7 @@ import (
 	"github.com/golgoth31/release-installer/internal/install"
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/golgoth31/release-installer/internal/output"
-	"github.com/logrusorgru/aurora"
+	"github.com/logrusorgru/aurora/v3"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
