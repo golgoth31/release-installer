@@ -108,7 +108,7 @@ func init() {
 
 	installCmd.PersistentFlags().String("apiVersion", "install/v1", "Set this install apiVersion")
 
-	if err := installConfig.BindPFlag("apiversion", installCmd.PersistentFlags().Lookup("apiVersion")); err != nil {
+	if err := installConfig.BindPFlag("apiVersion", installCmd.PersistentFlags().Lookup("apiVersion")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }

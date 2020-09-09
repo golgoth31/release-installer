@@ -1,7 +1,9 @@
+// Package config ...
 package config
 
 import "github.com/spf13/viper"
 
+// SetDefault ...
 func SetDefault(homedir string) {
 	viper.SetDefault("homedir", homedir)
 	viper.SetDefault("releases.dir", "releases")

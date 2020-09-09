@@ -106,6 +106,7 @@ func (i *Install) saveConfig() {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }
+
 func (i *Install) saveDefault() {
 	installPath := fmt.Sprintf(
 		"%s/%s/%s",
@@ -118,7 +119,7 @@ func (i *Install) saveDefault() {
 	if err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
-	defer f.Close()
+	defer f.Close() //nolint: errcheck,gosec
 
 	_, err = f.WriteString(i.Spec.Version)
 	if err != nil {
@@ -144,7 +145,7 @@ func (i *Install) removeConfig(revertError error) {
 }
 
 // Install ...
-func (i *Install) Install() {
+func (i *Install) Install() { //nolint: funlen
 	// define getter opts
 	var err error
 
@@ -211,7 +212,7 @@ func (i *Install) Install() {
 	}
 
 	// ensure the binary is executable
-	if err = os.Chmod(file, 0750); err != nil {
+	if err = os.Chmod(file, 0750); err != nil { //nolint: gosec
 		i.removeConfig(err)
 	}
 
@@ -237,5 +238,4 @@ func (i *Install) Install() {
 
 		logger.SuccessLog.Info().Msgf("Done")
 	}
-
 }
