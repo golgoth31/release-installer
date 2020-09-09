@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/golgoth31/release-installer/internal/config"
+
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -19,7 +21,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "release-installer",
-	Short: "A brief description of your application",
+	Short: "A tool to download and install binaries",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
 
@@ -95,11 +97,11 @@ func initConfig() {
 		if err := os.Mkdir(homedir, 0750); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
-		viper.SetDefault("homedir", homedir)
-		viper.SetDefault("releases.dir", "releases")
-		viper.SetDefault("releases.git", "https://github.com/golgoth31/release-installer-definitions.git")
-		if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
-		}
+	}
+
+	config.SetDefault(homedir)
+
+	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }

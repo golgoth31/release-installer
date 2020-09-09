@@ -20,13 +20,7 @@ var (
 // installCmd represents the install command.
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Install one release",
 	Run: func(cmd *cobra.Command, args []string) {
 		rel, err := cmd.Flags().GetString("release")
 		if err != nil {
@@ -63,21 +57,13 @@ func init() {
 
 	installConfig = viper.New()
 
-	installCmd.PersistentFlags().StringP("os", "o", "", "A help for foo")
-
-	if err := installCmd.MarkPersistentFlagRequired("os"); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
-	}
+	installCmd.PersistentFlags().StringP("os", "o", "linux", "A help for foo")
 
 	if err := installConfig.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	installCmd.PersistentFlags().StringP("arch", "a", "", "A help for foo")
-
-	if err := installCmd.MarkPersistentFlagRequired("arch"); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
-	}
+	installCmd.PersistentFlags().StringP("arch", "a", "amd64", "A help for foo")
 
 	if err := installConfig.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
@@ -93,11 +79,12 @@ func init() {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	installCmd.PersistentFlags().StringP("path", "p", "", "Destination to install file in, should set in your \"$PATH\"")
-
-	if err := installCmd.MarkPersistentFlagRequired("path"); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
-	}
+	installCmd.PersistentFlags().StringP(
+		"path",
+		"p",
+		"~/bin",
+		"Destination to install file in, should set in your \"$PATH\"",
+	)
 
 	if err := installConfig.BindPFlag("spec.path", installCmd.PersistentFlags().Lookup("path")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
@@ -116,6 +103,12 @@ func init() {
 	installCmd.PersistentFlags().BoolP("default", "d", false, "Set this install as default")
 
 	if err := installConfig.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default")); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	installCmd.PersistentFlags().String("apiVersion", "install/v1", "Set this install apiVersion")
+
+	if err := installConfig.BindPFlag("apiversion", installCmd.PersistentFlags().Lookup("apiVersion")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }

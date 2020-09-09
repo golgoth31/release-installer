@@ -25,18 +25,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-// initCmd represents the init command
+// initCmd represents the init command.
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Initialize release-installer",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.StepLog.Info().Msg("Initializing release-installer")
+		out.StepTitle("Initializing release-installer")
 		opt := &git.CloneOptions{
 			Depth: 1,
 			URL:   viper.GetString("releases.git"),

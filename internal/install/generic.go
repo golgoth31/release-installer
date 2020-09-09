@@ -10,5 +10,5 @@ func NewInstall(rel string) *Install {
 	yamlData = viper.New()
 	releaseData = release.New(rel)
 
-	return &Install{APIVersion: "release/v1", Kind: "Install"}
+	return &Install{Kind: "Install"}
 }
