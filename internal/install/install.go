@@ -81,7 +81,7 @@ func (i *Install) saveConfig() {
 	)
 
 	if _, err := os.Stat(installPath); err != nil {
-		if err = os.Mkdir(installPath, 0750); err != nil {
+		if err = os.MkdirAll(installPath, 0750); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 	}
