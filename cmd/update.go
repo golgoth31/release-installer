@@ -25,13 +25,13 @@ var updateCmd = &cobra.Command{
 		logger.StdLog.Info().Msgf("Cloning in %s", releasePath)
 		r, err := git.PlainOpen(releasePath)
 		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			logger.StdLog.Fatal().Err(err).Msg("Clone")
 		}
 
 		// Get the working directory for the repository
 		w, err := r.Worktree()
 		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			logger.StdLog.Fatal().Err(err).Msg("Worktree")
 		}
 
 		// Pull the latest changes from the origin remote and merge into the current branch
@@ -43,7 +43,7 @@ var updateCmd = &cobra.Command{
 		if errors.Is(err, git.NoErrAlreadyUpToDate) {
 			logger.SuccessLog.Info().Msg("Already up-to-date")
 		} else if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			logger.StdLog.Fatal().Err(err).Msg("Pull")
 		} else {
 			logger.SuccessLog.Info().Msg("Done")
 		}

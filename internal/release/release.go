@@ -32,9 +32,10 @@ func loadYaml(file string) *Release {
 		Spec: Spec{
 			URL: "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
 			File: File{
-				Archive:    "ri-{{ .Os }}-{{ .Arch }}",
+				Src:        "ri-{{ .Os }}-{{ .Arch }}",
 				BinaryPath: ".",
 				Binary:     "ri",
+				Mode:       "file",
 			},
 			Checksum: Checksum{
 				URL:    "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",

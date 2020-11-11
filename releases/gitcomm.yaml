@@ -1,0 +1,22 @@
+apiVersion: release/v1
+kind: Release
+metadata:
+  name: gitcomm
+  web: https://github.com/karantin2020/gitcomm
+spec:
+  url: https://github.com/karantin2020/gitcomm/releases/download/v{{ .Version }}
+  file:
+    src: gitcomm_{{ .Os }}_{{ .Arch }}
+    binaryPath: "."
+    binary: gitcomm
+    mode: file
+  checksum: {}
+  available:
+    os:
+      linux: linux
+      darwin: darwin
+      windows: windows
+    arch:
+      amd64: amd64
+      i386: "386"
+      arm64: arm64

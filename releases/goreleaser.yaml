@@ -1,0 +1,25 @@
+apiVersion: release/v1
+kind: Release
+metadata:
+  name: goreleaser
+  web: https://goreleaser.com/
+spec:
+  url: https://github.com/goreleaser/goreleaser/releases/download/v{{ .Version }}
+  file:
+    src: goreleaser_{{ .Os }}_{{ .Arch }}.tar.gz
+    binaryPath: "."
+    binary: goreleaser
+    mode: archive
+  checksum:
+    url: https://github.com/goreleaser/goreleaser/releases/download/v{{ .Version }}
+    file: goreleaser_checksums.txt
+    format: sha256
+  available:
+    os:
+      linux: Linux
+      darwin: Darwin
+      windows: Windows
+    arch:
+      amd64: x86_64
+      i386: i386
+      arm64: arm64

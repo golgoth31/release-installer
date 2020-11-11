@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/golgoth31/release-installer/internal/install"
 	logger "github.com/golgoth31/release-installer/internal/log"
@@ -57,13 +58,13 @@ func init() {
 
 	installConfig = viper.New()
 
-	installCmd.PersistentFlags().StringP("os", "o", "linux", "A help for foo")
+	installCmd.PersistentFlags().StringP("os", "o", runtime.GOOS, "A help for foo")
 
 	if err := installConfig.BindPFlag("spec.os", installCmd.PersistentFlags().Lookup("os")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	installCmd.PersistentFlags().StringP("arch", "a", "amd64", "A help for foo")
+	installCmd.PersistentFlags().StringP("arch", "a", runtime.GOARCH, "A help for foo")
 
 	if err := installConfig.BindPFlag("spec.arch", installCmd.PersistentFlags().Lookup("arch")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"text/template"
 
@@ -51,7 +52,7 @@ func (i *Install) templates() (
 		revertError = err
 	}
 
-	treleaseFileName := template.Must(template.New("releaseFileName").Parse(releaseData.Spec.File.Archive))
+	treleaseFileName := template.Must(template.New("releaseFileName").Parse(releaseData.Spec.File.Src))
 	if err := treleaseFileName.Execute(&releaseFileName, i.Spec); err != nil {
 		// out.Status(out.FatalStatus(), "Error templating release file name")
 		revertError = err
@@ -164,24 +165,40 @@ func (i *Install) Install() { //nolint: funlen
 		i.removeConfig(revertError)
 	}
 
+	var srcFile string
+	switch releaseData.Spec.File.Mode {
+	case "file":
+		srcFile = releaseFileName.String()
+	case "archive":
+		srcFile = releaseData.Spec.File.Binary
+	default:
+		i.removeConfig(fmt.Errorf("Unknown release mode"))
+	}
+
 	downURL := fmt.Sprintf(
 		"%s/%s",
 		releaseURL.String(),
 		releaseFileName.String(),
 	)
-	getterDownURL := fmt.Sprintf(
-		"%s?checksum=file:%s/%s",
-		downURL,
-		checksumURL.String(),
-		checksumFileName.String(),
-	)
+	getterDownURL := downURL
 
 	out.StepTitle("Release files")
 	fmt.Println()
-	logger.StdLog.Info().Msgf("Checksum file: %s/%s",
-		checksumURL.String(),
-		checksumFileName.String(),
-	)
+
+	if checksumURL.String() != "" && checksumFileName.String() != "" {
+		getterDownURL = fmt.Sprintf(
+			"%s?checksum=file:%s/%s",
+			downURL,
+			checksumURL.String(),
+			checksumFileName.String(),
+		)
+
+		logger.StdLog.Info().Msgf("Checksum file: %s/%s",
+			checksumURL.String(),
+			checksumFileName.String(),
+		)
+	}
+
 	logger.StdLog.Info().Msgf("Archive file:  %s", downURL)
 
 	fmt.Println()
@@ -195,15 +212,16 @@ func (i *Install) Install() { //nolint: funlen
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
 	// Build the client
 	opts := []getter.ClientOption{}
 	opts = append(opts, getter.WithProgress(defaultProgressBar))
 	client := &getter.Client{
 		Ctx:     ctx,
 		Src:     getterDownURL,
-		Dst:     file,
+		Dst:     "/tmp",
 		Pwd:     pwd,
-		Mode:    getter.ClientModeFile,
+		Mode:    getter.ClientModeAny,
 		Options: opts,
 	}
 
@@ -211,8 +229,11 @@ func (i *Install) Install() { //nolint: funlen
 		i.removeConfig(err)
 	}
 
-	// ensure the binary is executable
-	if err = os.Chmod(file, 0750); err != nil { //nolint: gosec
+	// Move binary file to requested path
+	if err = i.MoveFile(
+		fmt.Sprintf("/tmp/%s/%s", releaseData.Spec.File.BinaryPath, srcFile),
+		file,
+	); err != nil {
 		i.removeConfig(err)
 	}
 
@@ -238,4 +259,37 @@ func (i *Install) Install() { //nolint: funlen
 
 		logger.SuccessLog.Info().Msgf("Done")
 	}
+}
+
+func (i *Install) MoveFile(src string, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if e := out.Close(); e != nil {
+			err = e
+		}
+	}()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+
+	if err = out.Sync(); err != nil {
+		return err
+	}
+
+	if err = os.Chmod(dst, 0750); err != nil { //nolint: gosec
+		i.removeConfig(err)
+	}
+
+	return nil
 }
