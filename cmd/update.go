@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"errors"
+	"context"
 	"fmt"
+	"os"
 
-	"github.com/go-git/go-git/v5"
 	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/hashicorp/go-getter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -16,37 +17,36 @@ var updateCmd = &cobra.Command{
 	Short: "Update the releases definitions",
 	Run: func(cmd *cobra.Command, args []string) {
 		out.StepTitle("Updating releases definitions")
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
 		releasePath := fmt.Sprintf(
 			"%s/%s",
 			viper.GetString("homedir"),
 			viper.GetString("releases.dir"),
 		)
-		logger.StdLog.Info().Msgf("Cloning from %s", viper.GetString("releases.git"))
-		logger.StdLog.Info().Msgf("Cloning in %s", releasePath)
-		r, err := git.PlainOpen(releasePath)
+
+		// Build the client
+		pwd, err := os.Getwd()
 		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("Clone")
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+		opts := []getter.ClientOption{}
+		// opts = append(opts, getter.WithProgress(defaultProgressBar))
+		client := &getter.Client{
+			Ctx:     ctx,
+			Src:     "https://github.com/golgoth31/release-installer-definitions/releases/download/latest/ri-releases-definitions.tar.gz",
+			Dst:     releasePath,
+			Pwd:     pwd,
+			Mode:    getter.ClientModeAny,
+			Options: opts,
 		}
 
-		// Get the working directory for the repository
-		w, err := r.Worktree()
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("Worktree")
+		if err = client.Get(); err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		// Pull the latest changes from the origin remote and merge into the current branch
-		err = w.Pull(&git.PullOptions{
-			Depth:      1,
-			RemoteName: "origin",
-			Force:      true,
-		})
-		if errors.Is(err, git.NoErrAlreadyUpToDate) {
-			logger.SuccessLog.Info().Msg("Already up-to-date")
-		} else if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("Pull")
-		} else {
-			logger.SuccessLog.Info().Msg("Done")
-		}
+		logger.SuccessLog.Info().Msg("Done")
 	},
 }
 

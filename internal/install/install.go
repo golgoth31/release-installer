@@ -14,6 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/golgoth31/release-installer/internal/output"
+	"github.com/golgoth31/release-installer/internal/progressbar"
 	"github.com/golgoth31/release-installer/internal/release"
 	getter "github.com/hashicorp/go-getter"
 
@@ -24,7 +25,7 @@ import (
 var (
 	yamlData           *viper.Viper
 	releaseData        *release.Release
-	defaultProgressBar getter.ProgressTracker = &progressBar{}
+	defaultProgressBar getter.ProgressTracker = &progressbar.ProgressBar{}
 	out                output.Output
 )
 
@@ -43,6 +44,7 @@ func (i *Install) templates() (
 	releaseFileName bytes.Buffer,
 	checksumURL bytes.Buffer,
 	checksumFileName bytes.Buffer,
+	binaryPath bytes.Buffer,
 	revertError error) {
 	revertError = nil
 	// template strings
@@ -70,7 +72,13 @@ func (i *Install) templates() (
 		revertError = err
 	}
 
-	return releaseURL, releaseFileName, checksumURL, checksumFileName, revertError
+	tbinaryPath := template.Must(template.New("binaryPath").Parse(releaseData.Spec.File.BinaryPath))
+	if err := tbinaryPath.Execute(&binaryPath, i.Spec); err != nil {
+		// out.Status(out.FatalStatus(), "Error templating checksum file name")
+		revertError = err
+	}
+
+	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError
 }
 
 func (i *Install) saveConfig() {
@@ -160,7 +168,7 @@ func (i *Install) Install() { //nolint: funlen
 
 	i.saveConfig()
 
-	releaseURL, releaseFileName, checksumURL, checksumFileName, revertError := i.templates()
+	releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
 	if revertError != nil {
 		i.removeConfig(revertError)
 	}
@@ -231,7 +239,7 @@ func (i *Install) Install() { //nolint: funlen
 
 	// Move binary file to requested path
 	if err = i.MoveFile(
-		fmt.Sprintf("/tmp/%s/%s", releaseData.Spec.File.BinaryPath, srcFile),
+		fmt.Sprintf("/tmp/%s/%s", binaryPath.String(), srcFile),
 		file,
 	); err != nil {
 		i.removeConfig(err)
