@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"text/template"
 
@@ -23,21 +24,10 @@ import (
 )
 
 var (
-	yamlData           *viper.Viper
 	releaseData        *release.Release
 	defaultProgressBar getter.ProgressTracker = &progressbar.ProgressBar{}
 	out                output.Output
 )
-
-// LoadYaml ...
-func (i *Install) LoadYaml(file string) {
-	yamlData.SetConfigType("yaml")
-	yamlData.SetConfigFile(file)
-
-	if err := yamlData.ReadInConfig(); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
-	}
-}
 
 func (i *Install) templates() (
 	releaseURL bytes.Buffer,
@@ -79,6 +69,52 @@ func (i *Install) templates() (
 	}
 
 	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError
+}
+
+func (i *Install) IsInstalled(name string) bool {
+	installPath := fmt.Sprintf(
+		"%s/%s/%s",
+		viper.GetString("homedir"),
+		viper.GetString("install.dir"),
+		name,
+	)
+
+	_, err := os.Stat(installPath)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+// func (i *Install) IsDefault(name string) (string, error) {
+
+// }
+
+func (i *Install) GetDefault(name string) (string, error) {
+	installed := i.IsInstalled(name)
+	if installed {
+		installPath := fmt.Sprintf(
+			"%s/%s/%s",
+			viper.GetString("homedir"),
+			viper.GetString("install.dir"),
+			name,
+		)
+		defaultFile := fmt.Sprintf(
+			"%s/%s",
+			installPath,
+			"default",
+		)
+
+		data, err := ioutil.ReadFile(defaultFile)
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Reading default file")
+		}
+
+		return string(data), nil
+	}
+
+	return "", fmt.Errorf("Not installed")
 }
 
 func (i *Install) saveConfig() {
@@ -238,7 +274,7 @@ func (i *Install) Install() { //nolint: funlen
 	}
 
 	// Move binary file to requested path
-	if err = i.MoveFile(
+	if err = i.moveFile(
 		fmt.Sprintf("/tmp/%s/%s", binaryPath.String(), srcFile),
 		file,
 	); err != nil {
@@ -269,7 +305,7 @@ func (i *Install) Install() { //nolint: funlen
 	}
 }
 
-func (i *Install) MoveFile(src string, dst string) error {
+func (i *Install) moveFile(src string, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
 		return err

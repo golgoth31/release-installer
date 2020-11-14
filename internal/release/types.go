@@ -43,14 +43,14 @@ type Available struct {
 }
 
 type OS struct {
-	Linux   string
-	Windows string
-	Darwin  string
+	Linux   string `json:"linux,omitempty"`
+	Windows string `json:"windows,omitempty"`
+	Darwin  string `json:"darwin,omitempty"`
 }
 
 type Arch struct {
-	i386  string
-	amd64 string
-	arm64 string
-	arm   string
+	I386  string `json:"i386,omitempty"`
+	Amd64 string `json:"amd64,omitempty"`
+	Arm64 string `json:"arm64,omitempty"`
+	Arm   string `json:"arm,omitempty"`
 }

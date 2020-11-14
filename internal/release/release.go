@@ -42,6 +42,14 @@ func loadYaml(file string) *Release {
 				File:   "ri_{{ .Version }}_SHA256SUMS",
 				Format: "sha256",
 			},
+			Available: Available{
+				OS: OS{
+					Linux: "linux",
+				},
+				Arch: Arch{
+					Amd64: "amd64",
+				},
+			},
 		},
 	}
 
