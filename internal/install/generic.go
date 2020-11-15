@@ -8,5 +8,8 @@ import (
 func NewInstall(rel string) *Install {
 	releaseData = release.New(rel)
 
-	return &Install{Kind: "Install"}
+	return &Install{
+		APIVersion: "install/v1",
+		Kind:       "Install",
+	}
 }
