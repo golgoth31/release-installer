@@ -16,7 +16,7 @@ type Metadata struct {
 
 // Spec ...
 type Spec struct {
-	URL       string
+	Repo      Repo
 	File      File
 	Checksum  Checksum
 	Available Available
@@ -24,6 +24,7 @@ type Spec struct {
 
 // File ...
 type File struct {
+	URL        string
 	Src        string
 	Binary     string
 	Mode       string
@@ -37,17 +38,27 @@ type Checksum struct {
 	Format string
 }
 
+// Repo ...
+type Repo struct {
+	Type  string
+	Name  string
+	Owner string
+}
+
+// Available ...
 type Available struct {
 	OS   OS
 	Arch Arch
 }
 
+// OS ...
 type OS struct {
 	Linux   string `json:"linux,omitempty"`
 	Windows string `json:"windows,omitempty"`
 	Darwin  string `json:"darwin,omitempty"`
 }
 
+// Arch ...
 type Arch struct {
 	I386  string `json:"i386,omitempty"`
 	Amd64 string `json:"amd64,omitempty"`

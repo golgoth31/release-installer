@@ -2,9 +2,11 @@
 package release
 
 import (
+	"context"
 	"fmt"
 
 	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/google/go-github/v32/github"
 	"github.com/spf13/viper"
 )
 
@@ -13,6 +15,7 @@ var yamlData *viper.Viper
 // New ...
 func New(rel string) *Release {
 	yamlData = viper.New()
+
 	return loadYaml(rel)
 }
 
@@ -28,10 +31,16 @@ func loadYaml(file string) *Release {
 		Kind:       "Release",
 		Metadata: Metadata{
 			Name: "release-installer",
+			Web:  "https://github.com/golgoth31/release-installer",
 		},
 		Spec: Spec{
-			URL: "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
+			Repo: Repo{
+				Type:  "github",
+				Name:  "release-installer",
+				Owner: "golgoth31",
+			},
 			File: File{
+				URL:        "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
 				Src:        "ri-{{ .Os }}-{{ .Arch }}",
 				BinaryPath: ".",
 				Binary:     "ri",
@@ -43,10 +52,10 @@ func loadYaml(file string) *Release {
 				Format: "sha256",
 			},
 			Available: Available{
-				OS: OS{
+				OS: OS{ //nolint:go-lint
 					Linux: "linux",
 				},
-				Arch: Arch{
+				Arch: Arch{ //nolint:go-lint
 					Amd64: "amd64",
 				},
 			},
@@ -71,4 +80,26 @@ func loadYaml(file string) *Release {
 	}
 
 	return myself
+}
+
+// ListVersions ...
+func (r *Release) ListVersions(num int) []string {
+	ctx := context.Background()
+	client := github.NewClient(nil)
+	opts := &github.ListOptions{
+		Page:    1,
+		PerPage: num,
+	}
+	out := []string{}
+
+	release, _, err := client.Repositories.ListReleases(ctx, r.Spec.Repo.Owner, r.Spec.Repo.Name, opts)
+	if err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	for _, val := range release {
+		out = append(out, val.GetTagName())
+	}
+
+	return out
 }

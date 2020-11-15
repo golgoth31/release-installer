@@ -1,3 +1,4 @@
+// Package progressbar ...
 package progressbar
 
 import (
@@ -10,7 +11,8 @@ import (
 
 const pbWidth = 200
 
-func (cpb *ProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser {
+// TrackProgress generates a progress bar.
+func (cpb *ProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser { // nolint:go-lint
 	cpb.lock.Lock()
 	defer cpb.lock.Unlock()
 
@@ -38,9 +40,11 @@ func (cpb *ProgressBar) TrackProgress(src string, currentSize, totalSize int64, 
 			defer cpb.lock.Unlock()
 
 			pb.Wait()
+
 			return nil
 		},
 	}
 }
 
+// Close ...
 func (c *readCloser) Close() error { return c.close() }

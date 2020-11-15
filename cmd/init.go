@@ -6,18 +6,13 @@ import (
 	"os"
 
 	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/progressbar"
 	"github.com/hashicorp/go-getter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var (
-	defaultProgressBar getter.ProgressTracker = &progressbar.ProgressBar{}
-)
-
 // initCmd represents the init command.
-var initCmd = &cobra.Command{
+var initCmd = &cobra.Command{ //nolint:go-lint
 	Use:   "init",
 	Short: "Initialize release-installer",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -50,7 +45,7 @@ var initCmd = &cobra.Command{
 		}
 		opts := []getter.ClientOption{}
 		// opts = append(opts, getter.WithProgress(defaultProgressBar))
-		client := &getter.Client{
+		client := &getter.Client{ //nolint:go-lint
 			Ctx:     ctx,
 			Src:     "https://github.com/golgoth31/release-installer-definitions/releases/download/latest/ri-releases-definitions.tar.gz",
 			Dst:     releasePath,

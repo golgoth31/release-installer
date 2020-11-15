@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// ProgressBar structure.
 type ProgressBar struct {
 	// lock everything below
 	lock sync.Mutex

@@ -10,17 +10,14 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/mitchellh/go-homedir"
-
-	"gopkg.in/yaml.v2"
-
+	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/golgoth31/release-installer/internal/output"
 	"github.com/golgoth31/release-installer/internal/progressbar"
 	"github.com/golgoth31/release-installer/internal/release"
 	getter "github.com/hashicorp/go-getter"
-
-	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -38,39 +35,35 @@ func (i *Install) templates() (
 	revertError error) {
 	revertError = nil
 	// template strings
-	treleaseURL := template.Must(template.New("releaseURL").Parse(releaseData.Spec.URL))
+	treleaseURL := template.Must(template.New("releaseURL").Parse(releaseData.Spec.File.URL))
 	if err := treleaseURL.Execute(&releaseURL, i.Spec); err != nil {
-		// out.Status(out.FatalStatus(), "Error templating release URL")
 		revertError = err
 	}
 
 	treleaseFileName := template.Must(template.New("releaseFileName").Parse(releaseData.Spec.File.Src))
 	if err := treleaseFileName.Execute(&releaseFileName, i.Spec); err != nil {
-		// out.Status(out.FatalStatus(), "Error templating release file name")
 		revertError = err
 	}
 
 	tchecksumURL := template.Must(template.New("checksumURL").Parse(releaseData.Spec.Checksum.URL))
 	if err := tchecksumURL.Execute(&checksumURL, i.Spec); err != nil {
-		// out.Status(out.FatalStatus(), "Error templating checksum URL")
 		revertError = err
 	}
 
 	tchecksumFileName := template.Must(template.New("checksumFileName").Parse(releaseData.Spec.Checksum.File))
 	if err := tchecksumFileName.Execute(&checksumFileName, i.Spec); err != nil {
-		// out.Status(out.FatalStatus(), "Error templating checksum file name")
 		revertError = err
 	}
 
 	tbinaryPath := template.Must(template.New("binaryPath").Parse(releaseData.Spec.File.BinaryPath))
 	if err := tbinaryPath.Execute(&binaryPath, i.Spec); err != nil {
-		// out.Status(out.FatalStatus(), "Error templating checksum file name")
 		revertError = err
 	}
 
 	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError
 }
 
+// IsInstalled checks if a release is installed.
 func (i *Install) IsInstalled(name string) bool {
 	installPath := fmt.Sprintf(
 		"%s/%s/%s",
@@ -87,10 +80,7 @@ func (i *Install) IsInstalled(name string) bool {
 	return true
 }
 
-// func (i *Install) IsDefault(name string) (string, error) {
-
-// }
-
+// GetDefault gets default version installed.
 func (i *Install) GetDefault(name string) (string, error) {
 	installed := i.IsInstalled(name)
 	if installed {
@@ -190,7 +180,7 @@ func (i *Install) removeConfig(revertError error) {
 }
 
 // Install ...
-func (i *Install) Install() { //nolint: funlen
+func (i *Install) Install() { //nolint:go-lint
 	// define getter opts
 	var err error
 
@@ -210,6 +200,7 @@ func (i *Install) Install() { //nolint: funlen
 	}
 
 	var srcFile string
+
 	switch releaseData.Spec.File.Mode {
 	case "file":
 		srcFile = releaseFileName.String()
@@ -260,7 +251,7 @@ func (i *Install) Install() { //nolint: funlen
 	// Build the client
 	opts := []getter.ClientOption{}
 	opts = append(opts, getter.WithProgress(defaultProgressBar))
-	client := &getter.Client{
+	client := &getter.Client{ //nolint:go-lint
 		Ctx:     ctx,
 		Src:     getterDownURL,
 		Dst:     "/tmp",
@@ -316,6 +307,7 @@ func (i *Install) moveFile(src string, dst string) error {
 	if err != nil {
 		return err
 	}
+
 	defer func() {
 		if e := out.Close(); e != nil {
 			err = e

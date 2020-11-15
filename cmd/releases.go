@@ -6,20 +6,29 @@ import (
 	"path/filepath"
 
 	"github.com/golgoth31/release-installer/internal/install"
-
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // releasesCmd represents the releases command.
-var releasesCmd = &cobra.Command{
+var releasesCmd = &cobra.Command{ //nolint:go-lint
 	Use:   "releases",
 	Short: "List available releases",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		installed, err := cmd.Flags().GetBool("installed")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
 		fmt.Println()
-		out.StepTitle("Available releases")
+		if installed {
+			out.StepTitle("Installed releases")
+		} else {
+			out.StepTitle("Available releases")
+		}
+
 		fmt.Println()
 
 		var files []string
@@ -33,7 +42,7 @@ var releasesCmd = &cobra.Command{
 		yamlData := viper.New()
 		yamlData.SetConfigType("yaml") // or viper.SetConfigType("YAML")
 
-		err := filepath.Walk(releasePath, func(path string, info os.FileInfo, err error) error {
+		err = filepath.Walk(releasePath, func(path string, info os.FileInfo, err error) error {
 			if !info.IsDir() {
 				files = append(files, path)
 			}
@@ -58,7 +67,9 @@ var releasesCmd = &cobra.Command{
 					defaultVal,
 				)
 			} else {
-				logger.StdLog.Info().Msg(yamlData.GetString("metadata.name"))
+				if !installed {
+					logger.StdLog.Info().Msg(yamlData.GetString("metadata.name"))
+				}
 			}
 		}
 
@@ -69,9 +80,5 @@ var releasesCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(releasesCmd)
 
-	// releasesCmd.PersistentFlags().StringP("version", "v", "", "A help for foo")
-
-	// if err := releasesCmd.MarkPersistentFlagRequired("version"); err != nil {
-	// 	logger.StdLog.Fatal().Err(err).Msg("")
-	// }
+	releasesCmd.PersistentFlags().BoolP("installed", "i", false, "A help for foo")
 }
