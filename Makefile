@@ -54,12 +54,16 @@ lint:
 
 artifact_linux_amd64:
 	GOARCH=amd64 GOPROXY=https://proxy.golang.org CGO_ENABLED=0 GOOS=linux go build -ldflags '${LDFLAGS}' -o ri-linux-amd64
+	sha256sum ri-linux-amd64 >> ri_SHA256SUMS.txt
 artifact_linux_arm64:
 	GOARCH=arm64 GOPROXY=https://proxy.golang.org CGO_ENABLED=0 GOOS=linux go build -ldflags '${LDFLAGS}' -o ri-linux-arm64
+	sha256sum ri-linux-arm64 >> ri_SHA256SUMS.txt
 artifact_linux_armv7:
 	GOARM=7 GOARCH=arm GOPROXY=https://proxy.golang.org CGO_ENABLED=0 GOOS=linux go build -ldflags '${LDFLAGS}' -o ri-linux-armv7
+	sha256sum ri-linux-armv7 >> ri_SHA256SUMS.txt
 artifact_darwin_amd64:
 	GOARCH=amd64 GOPROXY=https://proxy.golang.org CGO_ENABLED=0 GOOS=darwin go build -ldflags '${LDFLAGS}' -o ri-darwin-amd64
+	sha256sum ri-darwin-amd64 >> ri_SHA256SUMS.txt
 
 artifact_all: artifact_linux_amd64 artifact_linux_arm64 artifact_linux_armv7 artifact_darwin
 

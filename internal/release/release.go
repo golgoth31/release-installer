@@ -48,7 +48,7 @@ func loadYaml(file string) *Release {
 			},
 			Checksum: Checksum{
 				URL:    "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
-				File:   "ri_{{ .Version }}_SHA256SUMS",
+				File:   "ri_SHA256SUMS.txt",
 				Format: "sha256",
 			},
 			Available: Available{

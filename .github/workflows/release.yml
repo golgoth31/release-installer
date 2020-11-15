@@ -39,6 +39,7 @@ jobs:
             ri-linux-arm64
             ri-linux-armv7
             ri-darwin-amd64
+            ri_SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker hub
