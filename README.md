@@ -4,6 +4,10 @@
 
 Many "devops" tools are single, statically linked, binary. Package managers are not always up to date and brew is almost made for Mac users. This tools **ri** is, it-self, a single binary, easy to install and esay to use to install binaries found on github for exemple.
 
+## Descriptions
+
+By default, the known descriptions will be put in ~/.release-installer/releases. You can add yours, it will be taken into account. But, if a software you use is not available, don't hesitate to propose a yaml description [here](https://github.com/golgoth31/release-installer-definitions).
+
 ## How to use it
 
 For the first run, download the needed binary file from the release page and run the init command. Once installed, ri will be able to auto update (binary and yaml definitions).
@@ -74,8 +78,8 @@ Result:
 
  Downloading files
 
-√ [========================================================================================] terraform_0.13.2_SHA256SUMS (731.43 KB/s)
-√ [===================================================================================] terraform_0.13.2_linux_amd64.zip (543.31 KB/s)
+√ [==================================================] terraform_0.13.2_SHA256SUMS (731.43 KB/s)
+√ [=============================================] terraform_0.13.2_linux_amd64.zip (543.31 KB/s)
 
 √ File saved as: /home/david/bin/terraform_0.13.2
 
