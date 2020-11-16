@@ -98,7 +98,7 @@ func (i *Install) GetDefault(name string) (string, error) {
 
 		data, err := ioutil.ReadFile(defaultFile)
 		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("Reading default file")
+			logger.StdLog.Debug().Err(err).Msg("Reading default file")
 		}
 
 		return string(data), nil
@@ -192,88 +192,98 @@ func (i *Install) Install() { //nolint:go-lint
 	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
 	file := link + "_" + i.Spec.Version
 
-	i.saveConfig()
+	if i.IsInstalled(i.Metadata.Release) {
+		out.StepTitle("This version is already installed")
+	} else {
+		i.saveConfig()
 
-	releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
-	if revertError != nil {
-		i.removeConfig(revertError)
-	}
+		releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
+		if revertError != nil {
+			i.removeConfig(revertError)
+		}
 
-	var srcFile string
+		var srcFile string
 
-	switch releaseData.Spec.File.Mode {
-	case "file":
-		srcFile = releaseFileName.String()
-	case "archive":
-		srcFile = releaseData.Spec.File.Binary
-	default:
-		i.removeConfig(fmt.Errorf("Unknown release mode"))
-	}
+		switch releaseData.Spec.File.Mode {
+		case "file":
+			srcFile = releaseFileName.String()
+		case "archive":
+			srcFile = releaseData.Spec.File.Binary
+		default:
+			i.removeConfig(fmt.Errorf("Unknown release mode"))
+		}
 
-	downURL := fmt.Sprintf(
-		"%s/%s",
-		releaseURL.String(),
-		releaseFileName.String(),
-	)
-	getterDownURL := downURL
-
-	out.StepTitle("Release files")
-	fmt.Println()
-
-	if checksumURL.String() != "" && checksumFileName.String() != "" {
-		getterDownURL = fmt.Sprintf(
-			"%s?checksum=file:%s/%s",
-			downURL,
-			checksumURL.String(),
-			checksumFileName.String(),
+		downURL := fmt.Sprintf(
+			"%s/%s",
+			releaseURL.String(),
+			releaseFileName.String(),
 		)
+		getterDownURL := downURL
 
-		logger.StdLog.Info().Msgf("Checksum file: %s/%s",
-			checksumURL.String(),
-			checksumFileName.String(),
-		)
+		out.StepTitle("Release files")
+		fmt.Println()
+
+		if checksumURL.String() != "" && checksumFileName.String() != "" {
+			getterDownURL = fmt.Sprintf(
+				"%s?checksum=file:%s/%s",
+				downURL,
+				checksumURL.String(),
+				checksumFileName.String(),
+			)
+
+			logger.StdLog.Info().Msgf("Checksum file: %s/%s",
+				checksumURL.String(),
+				checksumFileName.String(),
+			)
+		}
+
+		logger.StdLog.Info().Msgf("Archive file:  %s", downURL)
+
+		fmt.Println()
+		out.StepTitle("Downloading files")
+		fmt.Println()
+
+		pwd, err := os.Getwd()
+		if err != nil {
+			i.removeConfig(err)
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		// Build the client
+		opts := []getter.ClientOption{}
+		opts = append(opts, getter.WithProgress(defaultProgressBar))
+		client := &getter.Client{ //nolint:go-lint
+			Ctx:     ctx,
+			Src:     getterDownURL,
+			Dst:     "/tmp",
+			Pwd:     pwd,
+			Mode:    getter.ClientModeAny,
+			Options: opts,
+		}
+
+		if err = client.Get(); err != nil {
+			i.removeConfig(err)
+		}
+
+		// Move binary file to requested path
+		if err = i.moveFile(
+			fmt.Sprintf("/tmp/%s/%s", binaryPath.String(), srcFile),
+			file,
+		); err != nil {
+			i.removeConfig(err)
+		}
+
+		fmt.Println()
+		logger.SuccessLog.Info().Msgf("File saved as: %s", file)
 	}
 
-	logger.StdLog.Info().Msgf("Archive file:  %s", downURL)
-
-	fmt.Println()
-	out.StepTitle("Downloading files")
-	fmt.Println()
-
-	pwd, err := os.Getwd()
-	if err != nil {
-		i.removeConfig(err)
+	_, err = i.GetDefault(i.Metadata.Release)
+	if err == nil {
+		logger.StdLog.Debug().Msgf("No default for release: %s\n", i.Metadata.Release)
+		i.Spec.Default = true
 	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Build the client
-	opts := []getter.ClientOption{}
-	opts = append(opts, getter.WithProgress(defaultProgressBar))
-	client := &getter.Client{ //nolint:go-lint
-		Ctx:     ctx,
-		Src:     getterDownURL,
-		Dst:     "/tmp",
-		Pwd:     pwd,
-		Mode:    getter.ClientModeAny,
-		Options: opts,
-	}
-
-	if err = client.Get(); err != nil {
-		i.removeConfig(err)
-	}
-
-	// Move binary file to requested path
-	if err = i.moveFile(
-		fmt.Sprintf("/tmp/%s/%s", binaryPath.String(), srcFile),
-		file,
-	); err != nil {
-		i.removeConfig(err)
-	}
-
-	fmt.Println()
-	logger.SuccessLog.Info().Msgf("File saved as: %s", file)
 
 	if i.Spec.Default {
 		fmt.Println()
