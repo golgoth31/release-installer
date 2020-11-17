@@ -41,7 +41,7 @@ var updateCmd = &cobra.Command{ //nolint:go-lint
 			inst.Spec.Path = path
 			inst.Spec.Version = list[0]
 			inst.Spec.Default = true
-			inst.Install()
+			inst.Install(true)
 		}
 
 		fmt.Println()

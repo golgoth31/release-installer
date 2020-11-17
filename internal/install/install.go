@@ -64,12 +64,13 @@ func (i *Install) templates() (
 }
 
 // IsInstalled checks if a release is installed.
-func (i *Install) IsInstalled(name string) bool {
+func (i *Install) IsInstalled(name string, ver string) bool {
 	installPath := fmt.Sprintf(
-		"%s/%s/%s",
+		"%s/%s/%s/%s.yaml",
 		viper.GetString("homedir"),
 		viper.GetString("install.dir"),
 		name,
+		ver,
 	)
 
 	_, err := os.Stat(installPath)
@@ -82,29 +83,26 @@ func (i *Install) IsInstalled(name string) bool {
 
 // GetDefault gets default version installed.
 func (i *Install) GetDefault(name string) (string, error) {
-	installed := i.IsInstalled(name)
-	if installed {
-		installPath := fmt.Sprintf(
-			"%s/%s/%s",
-			viper.GetString("homedir"),
-			viper.GetString("install.dir"),
-			name,
-		)
-		defaultFile := fmt.Sprintf(
-			"%s/%s",
-			installPath,
-			"default",
-		)
+	installPath := fmt.Sprintf(
+		"%s/%s/%s",
+		viper.GetString("homedir"),
+		viper.GetString("install.dir"),
+		name,
+	)
+	defaultFile := fmt.Sprintf(
+		"%s/%s",
+		installPath,
+		"default",
+	)
 
-		data, err := ioutil.ReadFile(defaultFile)
-		if err != nil {
-			logger.StdLog.Debug().Err(err).Msg("Reading default file")
-		}
-
-		return string(data), nil
+	data, err := ioutil.ReadFile(defaultFile)
+	if err != nil {
+		logger.StdLog.Debug().Err(err).Msg("Reading default file")
+		return "", err
 	}
+	logger.StdLog.Debug().Msgf("default data: %s", data)
+	return string(data), nil
 
-	return "", fmt.Errorf("Not installed")
 }
 
 func (i *Install) saveConfig() {
@@ -180,7 +178,7 @@ func (i *Install) removeConfig(revertError error) {
 }
 
 // Install ...
-func (i *Install) Install() { //nolint:go-lint
+func (i *Install) Install(force bool) { //nolint:go-lint
 	// define getter opts
 	var err error
 
@@ -192,9 +190,7 @@ func (i *Install) Install() { //nolint:go-lint
 	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
 	file := link + "_" + i.Spec.Version
 
-	if i.IsInstalled(i.Metadata.Release) {
-		out.StepTitle("This version is already installed")
-	} else {
+	if !i.IsInstalled(i.Metadata.Release, i.Spec.Version) || force {
 		i.saveConfig()
 
 		releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
@@ -277,10 +273,12 @@ func (i *Install) Install() { //nolint:go-lint
 
 		fmt.Println()
 		logger.SuccessLog.Info().Msgf("File saved as: %s", file)
+	} else {
+		out.StepTitle("This version is already installed")
 	}
 
 	_, err = i.GetDefault(i.Metadata.Release)
-	if err == nil {
+	if err != nil {
 		logger.StdLog.Debug().Msgf("No default for release: %s\n", i.Metadata.Release)
 		i.Spec.Default = true
 	}
@@ -289,15 +287,17 @@ func (i *Install) Install() { //nolint:go-lint
 		fmt.Println()
 		logger.StdLog.Info().Msgf("Creating symlink: %s\n", link)
 
-		_, err = os.Stat(link)
+		_, err := os.Stat(link)
 		if err == nil {
 			if err = os.Remove(link); err != nil {
-				i.removeConfig(err)
+				logger.StdLog.Fatal().Err(err).Msg("")
 			}
+		} else {
+			logger.StdLog.Debug().Msgf("file not found: %s\n", i.Metadata.Release)
 		}
 
 		if err = os.Symlink(file, link); err != nil {
-			i.removeConfig(err)
+			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
 		i.saveDefault()

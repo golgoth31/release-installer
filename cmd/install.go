@@ -24,6 +24,12 @@ var installCmd = &cobra.Command{ //nolint:go-lint
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		rel := args[0]
+
+		force, err := cmd.PersistentFlags().GetBool("force")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
 		installConfig.Set("metadata.release", rel)
 		inst := install.NewInstall(rel)
 		if err := installConfig.Unmarshal(inst); err != nil {
@@ -40,7 +46,7 @@ var installCmd = &cobra.Command{ //nolint:go-lint
 		logger.StdLog.Info().Msgf("Path:    %s", inst.Spec.Path)
 		fmt.Println()
 
-		inst.Install()
+		inst.Install(force)
 
 		fmt.Println()
 		fmt.Printf(" %v", aurora.Bold(logger.OkStatus()))
@@ -93,4 +99,6 @@ func init() {
 	if err := installConfig.BindPFlag("spec.default", installCmd.PersistentFlags().Lookup("default")); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
+
+	installCmd.PersistentFlags().BoolP("force", "f", false, "Force release install")
 }
