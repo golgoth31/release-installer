@@ -64,16 +64,12 @@ func (i *Install) templates() (
 }
 
 // IsInstalled checks if a release is installed.
-func (i *Install) IsInstalled(name string, ver string) bool {
-	installPath := fmt.Sprintf(
-		"%s/%s/%s/%s.yaml",
-		viper.GetString("homedir"),
-		viper.GetString("install.dir"),
-		name,
-		ver,
-	)
+func (i *Install) IsInstalled() bool {
+	_, versionPath, _ := i.Paths()
 
-	_, err := os.Stat(installPath)
+	logger.StdLog.Debug().Msgf("Release install file: %s", versionPath)
+
+	_, err := os.Stat(versionPath)
 	if err != nil {
 		return false
 	}
@@ -82,39 +78,49 @@ func (i *Install) IsInstalled(name string, ver string) bool {
 }
 
 // GetDefault gets default version installed.
-func (i *Install) GetDefault(name string) (string, error) {
-	installPath := fmt.Sprintf(
-		"%s/%s/%s",
-		viper.GetString("homedir"),
-		viper.GetString("install.dir"),
-		name,
-	)
-	defaultFile := fmt.Sprintf(
-		"%s/%s",
-		installPath,
-		"default",
-	)
+func (i *Install) GetDefault() (string, error) {
+	_, _, defaultFile := i.Paths()
 
 	data, err := ioutil.ReadFile(defaultFile)
 	if err != nil {
 		logger.StdLog.Debug().Err(err).Msg("Reading default file")
+
 		return "", err
 	}
-	logger.StdLog.Debug().Msgf("default data: %s", data)
-	return string(data), nil
 
+	logger.StdLog.Debug().Msgf("default data: %s", data)
+
+	return string(data), nil
 }
 
-func (i *Install) saveConfig() {
-	installPath := fmt.Sprintf(
+func (i *Install) Paths() (installDir string, versionFile string, defaultFile string) {
+	installDir = fmt.Sprintf(
 		"%s/%s/%s",
 		viper.GetString("homedir"),
 		viper.GetString("install.dir"),
 		i.Metadata.Release,
 	)
 
-	if _, err := os.Stat(installPath); err != nil {
-		if err = os.MkdirAll(installPath, 0750); err != nil {
+	versionFile = fmt.Sprintf(
+		"%s/%s.yaml",
+		installDir,
+		i.Spec.Version,
+	)
+
+	defaultFile = fmt.Sprintf(
+		"%s/%s",
+		installDir,
+		"default",
+	)
+
+	return
+}
+
+func (i *Install) saveConfig() {
+	installDir, versionFile, _ := i.Paths()
+
+	if _, err := os.Stat(installDir); err != nil {
+		if err = os.MkdirAll(installDir, 0750); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 	}
@@ -128,27 +134,19 @@ func (i *Install) saveConfig() {
 
 	saveData.SetConfigType("yaml")
 
-	err = saveData.ReadConfig(bytes.NewBuffer(saving))
-	if err != nil {
+	if err := saveData.ReadConfig(bytes.NewBuffer(saving)); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	if err := saveData.WriteConfigAs(
-		installPath + "/" + i.Spec.Version + ".yaml",
-	); err != nil {
+	if err := saveData.WriteConfigAs(versionFile); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }
 
 func (i *Install) saveDefault() {
-	installPath := fmt.Sprintf(
-		"%s/%s/%s",
-		viper.GetString("homedir"),
-		viper.GetString("install.dir"),
-		i.Metadata.Release,
-	)
+	_, _, defaultFile := i.Paths()
 
-	f, err := os.Create(installPath + "/default")
+	f, err := os.Create(defaultFile)
 	if err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
@@ -161,19 +159,53 @@ func (i *Install) saveDefault() {
 }
 
 func (i *Install) removeConfig(revertError error) {
-	installPath := fmt.Sprintf(
-		"%s/%s/%s",
-		viper.GetString("homedir"),
-		viper.GetString("install.dir"),
-		i.Metadata.Release,
-	)
+	_, versionFile, _ := i.Paths()
 
-	if err := os.Remove(installPath + "/" + i.Spec.Version + ".yaml"); err != nil {
+	if err := os.Remove(versionFile); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
 	if revertError != nil {
 		logger.StdLog.Fatal().Err(revertError).Msg("")
+	}
+}
+
+// Get ...
+func (i *Install) Get() {
+	_, versionFile, _ := i.Paths()
+
+	vip := viper.New()
+	vip.SetConfigFile(versionFile)
+
+	if err := vip.ReadInConfig(); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	if err := vip.Unmarshal(i); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	logger.StdLog.Debug().Msgf("Binary path: %s", i.Spec.Path)
+}
+
+// Delete ...
+func (i *Install) Delete() {
+	i.Get()
+	_, versionFile, _ := i.Paths()
+
+	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
+	file := link + "_" + i.Spec.Version
+
+	logger.StdLog.Debug().Msgf("Remove binary: %s", file)
+
+	if err := os.Remove(file); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	logger.StdLog.Debug().Msgf("Remove yaml: %s", versionFile)
+
+	if err := os.Remove(versionFile); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 }
 
@@ -190,7 +222,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
 	file := link + "_" + i.Spec.Version
 
-	if !i.IsInstalled(i.Metadata.Release, i.Spec.Version) || force {
+	if !i.IsInstalled() || force {
 		i.saveConfig()
 
 		releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
@@ -277,7 +309,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		out.StepTitle("This version is already installed")
 	}
 
-	_, err = i.GetDefault(i.Metadata.Release)
+	_, err = i.GetDefault()
 	if err != nil {
 		logger.StdLog.Debug().Msgf("No default for release: %s\n", i.Metadata.Release)
 		i.Spec.Default = true

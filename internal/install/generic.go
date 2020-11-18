@@ -11,5 +11,8 @@ func NewInstall(rel string) *Install {
 	return &Install{
 		APIVersion: "install/v1",
 		Kind:       "Install",
+		Metadata: Metadata{
+			Release: rel,
+		},
 	}
 }
