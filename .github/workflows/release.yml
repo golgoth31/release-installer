@@ -15,58 +15,38 @@ jobs:
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-      - name: Get dependencies
-        run: |
-          go get -v -t -d ./...
-          if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
-          fi
-      - name: Build-linux-amd64
-        run: make artifact_linux_amd64
-      - name: Build-linux-arm64
-        run: make artifact_linux_arm64
-      - name: Build-linux-armv7
-        run: make artifact_linux_armv7
-      - name: Build-darwin-amd64
-        run: make artifact_darwin_amd64
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
         with:
-          files: |
-            ri-linux-amd64
-            ri-linux-arm64
-            ri-linux-armv7
-            ri-darwin-amd64
-            ri_SHA256SUMS.txt
+          version: latest
+          args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker hub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: golgoth31/ri
-          tags: amd64
-          push: ${{ startsWith(github.ref, 'refs/tags/') }}
-          dockerfile: build/amd64.dockerfile
-          add_git_labels: true
-      - name: Docker hub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: golgoth31/ri
-          tags: arm64
-          push: ${{ startsWith(github.ref, 'refs/tags/') }}
-          dockerfile: build/arm64.dockerfile
-          add_git_labels: true
-      - name: Multiarch
-        run: |
-          curl -Lo manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.2/manifest-tool-linux-amd64
-          chmod +x manifest-tool
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          version=$(git describe --tags --always || git rev-parse --short HEAD)
-          echo "tags: ['$version']" >> build/manifest.yaml
-          ./manifest-tool push from-spec build/manifest.yaml
+      # - name: Docker hub
+      #   uses: docker/build-push-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      #     repository: golgoth31/ri
+      #     tags: amd64
+      #     push: ${{ startsWith(github.ref, 'refs/tags/') }}
+      #     dockerfile: build/amd64.dockerfile
+      #     add_git_labels: true
+      # - name: Docker hub
+      #   uses: docker/build-push-action@v1
+      #   with:
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      #     repository: golgoth31/ri
+      #     tags: arm64
+      #     push: ${{ startsWith(github.ref, 'refs/tags/') }}
+      #     dockerfile: build/arm64.dockerfile
+      #     add_git_labels: true
+      # - name: Multiarch
+      #   run: |
+      #     curl -Lo manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.2/manifest-tool-linux-amd64
+      #     chmod +x manifest-tool
+      #     docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      #     version=$(git describe --tags --always || git rev-parse --short HEAD)
+      #     echo "tags: ['$version']" >> build/manifest.yaml
+      #     ./manifest-tool push from-spec build/manifest.yaml

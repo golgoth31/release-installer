@@ -30,7 +30,7 @@ var installCmd = &cobra.Command{ //nolint:go-lint
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		installConfig.Set("metadata.release", rel)
+		// installConfig.Set("metadata.release", rel)
 		inst := install.NewInstall(rel)
 		if err := installConfig.Unmarshal(inst); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")

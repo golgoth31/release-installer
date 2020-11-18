@@ -41,14 +41,14 @@ func loadYaml(file string) *Release {
 			},
 			File: File{
 				URL:        "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
-				Src:        "ri-{{ .Os }}-{{ .Arch }}",
+				Src:        "ri_{{ .Version }}_{{ .Os }}_{{ .Arch }}",
 				BinaryPath: ".",
 				Binary:     "ri",
 				Mode:       "file",
 			},
 			Checksum: Checksum{
 				URL:    "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
-				File:   "ri_SHA256SUMS.txt",
+				File:   "ri_{{ .Version }}_SHA256SUMS.txt",
 				Format: "sha256",
 			},
 			Available: Available{

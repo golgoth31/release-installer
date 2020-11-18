@@ -3,11 +3,11 @@ package configs
 
 // Dynamic version retrieve with ldflags
 
-// Version represent version of application
+// Version represent version of application.
 var Version string
 
-// GitCommit represent git commit
-var GitCommit string
+// Date represent date of build.
+var Date string
 
-// BuildDate represent date of build
-var BuildDate string
+// BuiltBy represent date of build.
+var BuiltBy string

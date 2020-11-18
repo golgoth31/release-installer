@@ -58,8 +58,8 @@ var releasesCmd = &cobra.Command{ //nolint:go-lint
 			if err := yamlData.ReadInConfig(); err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
 			}
-
-			defaultVal, err := inst.GetDefault(yamlData.GetString("metadata.name"))
+			inst.Metadata.Release = yamlData.GetString("metadata.name")
+			defaultVal, err := inst.GetDefault()
 			if err == nil {
 				logger.SuccessLog.Info().Msgf(
 					"%s (%s)",

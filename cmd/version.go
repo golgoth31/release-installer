@@ -27,7 +27,12 @@ var versionCmd = &cobra.Command{ //nolint:go-lint
 	Use:   "version",
 	Short: "Show the ro=i version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version: %v, build from: %v, on: %v\n", configs.Version, configs.GitCommit, configs.BuildDate)
+		fmt.Printf(
+			"Version: %v\nBuild date: %v\nBuild by: %s\n",
+			configs.Version,
+			configs.Date,
+			configs.BuiltBy,
+		)
 	},
 }
 
