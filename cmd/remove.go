@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"github.com/golgoth31/release-installer/internal/install"
-
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +25,7 @@ import (
 // removeCmd represents the remove command
 var removeCmd = &cobra.Command{
 	Use:   "remove",
-	Short: "A brief description of your command",
+	Short: "Remove a specific release version",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		rel := args[0]

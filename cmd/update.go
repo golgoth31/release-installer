@@ -7,10 +7,9 @@ import (
 	"runtime"
 
 	"github.com/golgoth31/release-installer/configs"
-	"github.com/golgoth31/release-installer/internal/release"
-
 	"github.com/golgoth31/release-installer/internal/install"
 	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/golgoth31/release-installer/internal/release"
 	"github.com/hashicorp/go-getter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,15 +23,18 @@ var updateCmd = &cobra.Command{ //nolint:go-lint
 		rel := release.New("myself")
 		list := rel.ListVersions(1)
 
-		if configs.Version == list[0] {
-			out.StepTitle("No need to update ri binary")
-		} else {
+		force, err := cmd.PersistentFlags().GetBool("force")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
+		if configs.Version != list[0] || force {
 			out.StepTitle("Updating ri binary")
 			fmt.Println()
 
-			path, err := cmd.PersistentFlags().GetString("path")
-			if err != nil {
-				logger.StdLog.Fatal().Err(err).Msg("")
+			path, errFlag := cmd.PersistentFlags().GetString("path")
+			if errFlag != nil {
+				logger.StdLog.Fatal().Err(errFlag).Msg("")
 			}
 
 			inst := install.NewInstall("myself")
@@ -41,7 +43,9 @@ var updateCmd = &cobra.Command{ //nolint:go-lint
 			inst.Spec.Path = path
 			inst.Spec.Version = list[0]
 			inst.Spec.Default = true
-			inst.Install(true)
+			inst.Install(force)
+		} else {
+			out.StepTitle("No need to update ri binary")
 		}
 
 		fmt.Println()
@@ -90,4 +94,6 @@ func init() {
 		"~/bin",
 		"Destination to install binary in, should be set in your \"$PATH\"",
 	)
+
+	updateCmd.PersistentFlags().BoolP("force", "f", false, "Force release install")
 }

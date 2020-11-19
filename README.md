@@ -12,7 +12,7 @@ By default, the known descriptions will be put in ~/.release-installer/releases.
 
 For the first run, download the needed binary file from the release page and run the init command. Once installed, ri will be able to auto update (binary and yaml definitions).
 
-```bash
+```txt
 Usage:
   ri [command]
 
@@ -22,6 +22,7 @@ Available Commands:
   install     Install one release
   release     List available version of a release
   releases    List available releases
+  remove      Remove a specific release version
   update      Update the releases definitions
   version     Show the ro=i version
 
