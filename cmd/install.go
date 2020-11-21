@@ -37,13 +37,14 @@ var installCmd = &cobra.Command{ //nolint:go-lint
 		}
 
 		fmt.Println()
-		out.StepTitle(fmt.Sprintf("Installing release \"%s\"", rel))
+		out.StepTitle(fmt.Sprintf("Installing \"%s\"", rel))
 		fmt.Println()
-		logger.StdLog.Info().Msgf("Version: %s", inst.Spec.Version)
-		logger.StdLog.Info().Msgf("OS:      %s", inst.Spec.Os)
-		logger.StdLog.Info().Msgf("Arch:    %s", inst.Spec.Arch)
-		logger.StdLog.Info().Msgf("Default: %t", inst.Spec.Default)
-		logger.StdLog.Info().Msgf("Path:    %s", inst.Spec.Path)
+		logger.StdLog.Info().Msg("Requested:")
+		logger.StdLog.Info().Msgf("  Version: %s", inst.Spec.Version)
+		logger.StdLog.Info().Msgf("  OS:      %s", inst.Spec.Os)
+		logger.StdLog.Info().Msgf("  Arch:    %s", inst.Spec.Arch)
+		logger.StdLog.Info().Msgf("  Default: %t", inst.Spec.Default)
+		logger.StdLog.Info().Msgf("  Path:    %s", inst.Spec.Path)
 		fmt.Println()
 
 		inst.Install(force)

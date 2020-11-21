@@ -47,12 +47,12 @@ type Repo struct {
 
 // Available ...
 type Available struct {
-	OS   OS
+	Os   Os
 	Arch Arch
 }
 
 // OS ...
-type OS struct {
+type Os struct {
 	Linux   string `json:"linux,omitempty"`
 	Windows string `json:"windows,omitempty"`
 	Darwin  string `json:"darwin,omitempty"`

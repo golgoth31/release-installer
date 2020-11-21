@@ -52,7 +52,7 @@ func loadYaml(file string) *Release {
 				Format: "sha256",
 			},
 			Available: Available{
-				OS: OS{ //nolint:go-lint
+				Os: Os{ //nolint:go-lint
 					Linux: "linux",
 				},
 				Arch: Arch{ //nolint:go-lint

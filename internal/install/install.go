@@ -8,6 +8,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"reflect"
+	"strings"
 	"text/template"
 
 	logger "github.com/golgoth31/release-installer/internal/log"
@@ -61,6 +63,29 @@ func (i *Install) templates() (
 	}
 
 	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError
+}
+
+// SetArch ...
+func (i *Install) setRealValues(field string) (val string) {
+	var relAvailable, instSpec interface{}
+
+	switch field {
+	case "Arch":
+		relAvailable = releaseData.Spec.Available.Arch
+		instSpec = i.Spec.Arch
+	case "Os":
+		relAvailable = releaseData.Spec.Available.Os
+		instSpec = i.Spec.Os
+	}
+
+	lowerVal := strings.Title(strings.ToLower(fmt.Sprintf("%v", instSpec)))
+	realData := reflect.ValueOf(relAvailable).FieldByName(lowerVal)
+
+	if fmt.Sprintf("%s", realData) != "" {
+		val = fmt.Sprintf("%s", realData)
+	}
+
+	return val
 }
 
 // IsInstalled checks if a release is installed.
@@ -213,6 +238,12 @@ func (i *Install) Delete() {
 func (i *Install) Install(force bool) { //nolint:go-lint
 	// define getter opts
 	var err error
+
+	i.Spec.Arch = i.setRealValues("Arch")
+	i.Spec.Os = i.setRealValues("Os")
+
+	logger.StdLog.Debug().Msgf("Release Arch: %s", i.Spec.Arch)
+	logger.StdLog.Debug().Msgf("Release Os: %s", i.Spec.Os)
 
 	i.Spec.Path, err = homedir.Expand(i.Spec.Path)
 	if err != nil {
