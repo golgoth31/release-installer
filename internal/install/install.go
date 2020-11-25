@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
-	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/golgoth31/release-installer/internal/output"
 	"github.com/golgoth31/release-installer/internal/progressbar"
@@ -37,27 +38,27 @@ func (i *Install) templates() (
 	revertError error) {
 	revertError = nil
 	// template strings
-	treleaseURL := template.Must(template.New("releaseURL").Parse(releaseData.Spec.File.URL))
+	treleaseURL := template.Must(template.New("releaseURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.URL))
 	if err := treleaseURL.Execute(&releaseURL, i.Spec); err != nil {
 		revertError = err
 	}
 
-	treleaseFileName := template.Must(template.New("releaseFileName").Parse(releaseData.Spec.File.Src))
+	treleaseFileName := template.Must(template.New("releaseFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.Src))
 	if err := treleaseFileName.Execute(&releaseFileName, i.Spec); err != nil {
 		revertError = err
 	}
 
-	tchecksumURL := template.Must(template.New("checksumURL").Parse(releaseData.Spec.Checksum.URL))
+	tchecksumURL := template.Must(template.New("checksumURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.URL))
 	if err := tchecksumURL.Execute(&checksumURL, i.Spec); err != nil {
 		revertError = err
 	}
 
-	tchecksumFileName := template.Must(template.New("checksumFileName").Parse(releaseData.Spec.Checksum.File))
+	tchecksumFileName := template.Must(template.New("checksumFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.File))
 	if err := tchecksumFileName.Execute(&checksumFileName, i.Spec); err != nil {
 		revertError = err
 	}
 
-	tbinaryPath := template.Must(template.New("binaryPath").Parse(releaseData.Spec.File.BinaryPath))
+	tbinaryPath := template.Must(template.New("binaryPath").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.BinaryPath))
 	if err := tbinaryPath.Execute(&binaryPath, i.Spec); err != nil {
 		revertError = err
 	}
@@ -145,7 +146,7 @@ func (i *Install) saveConfig() {
 	installDir, versionFile, _ := i.Paths()
 
 	if _, err := os.Stat(installDir); err != nil {
-		if err = os.MkdirAll(installDir, 0750); err != nil {
+		if err = os.MkdirAll(installDir, 0o750); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 	}
@@ -396,7 +397,7 @@ func (i *Install) moveFile(src string, dst string) error {
 		return err
 	}
 
-	if err = os.Chmod(dst, 0750); err != nil { //nolint: gosec
+	if err = os.Chmod(dst, 0o750); err != nil { //nolint: gosec
 		i.removeConfig(err)
 	}
 
