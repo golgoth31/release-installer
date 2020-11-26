@@ -142,7 +142,7 @@ func (i *Install) Paths() (installDir string, versionFile string, defaultFile st
 	return
 }
 
-func (i *Install) saveConfig() {
+func (i *Install) SaveConfig() {
 	installDir, versionFile, _ := i.Paths()
 
 	if _, err := os.Stat(installDir); err != nil {
@@ -255,8 +255,6 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 	file := link + "_" + i.Spec.Version
 
 	if !i.IsInstalled() || force {
-		i.saveConfig()
-
 		releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
 		if revertError != nil {
 			i.removeConfig(revertError)
@@ -341,10 +339,18 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		out.StepTitle("This version is already installed")
 	}
 
-	_, err = i.GetDefault()
+	defaultVer, err := i.GetDefault()
 	if err != nil {
 		logger.StdLog.Debug().Msgf("No default for release: %s\n", i.Metadata.Release)
 		i.Spec.Default = true
+	} else {
+		if defaultVer != i.Spec.Version {
+			curDefInst := NewInstall(i.Metadata.Release)
+			curDefInst.Spec.Version = defaultVer
+			curDefInst.Get()
+			curDefInst.Spec.Default = false
+			curDefInst.SaveConfig()
+		}
 	}
 
 	if i.Spec.Default {
@@ -368,6 +374,8 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 
 		logger.SuccessLog.Info().Msgf("Done")
 	}
+
+	i.SaveConfig()
 }
 
 func (i *Install) moveFile(src string, dst string) error {

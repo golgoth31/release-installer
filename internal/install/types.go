@@ -18,6 +18,6 @@ type Spec struct {
 	Version string `json:"version"`
 	Os      string `json:"os"`
 	Arch    string `json:"arch"`
-	Default bool   `json:"default"`
 	Path    string `json:"path"`
+	Default bool   `json:"default"`
 }

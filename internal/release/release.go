@@ -67,7 +67,8 @@ func loadYaml(file string) *Release {
 		yamlData.SetConfigFile(fmt.Sprintf("%s/%s.yaml", releasePath, file))
 
 		if err := yamlData.ReadInConfig(); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			logger.StdLog.Debug().Err(err).Msg("Unable to read release definition")
+			logger.StdLog.Fatal().Msg("Unknown release")
 		}
 
 		r := &Release{}
@@ -94,7 +95,7 @@ func (r *Release) ListVersions(num int) []string {
 
 	release, _, err := client.Repositories.ListReleases(ctx, r.Spec.Repo.Owner, r.Spec.Repo.Name, opts)
 	if err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		logger.StdLog.Fatal().Err(err).Msg("Unable to get version list")
 	}
 
 	for _, val := range release {
