@@ -147,7 +147,7 @@ func (i *Install) SaveConfig() {
 
 	if _, err := os.Stat(installDir); err != nil {
 		if err = os.MkdirAll(installDir, 0o750); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			logger.StdLog.Fatal().Err(err).Msgf("Unable to create directory: %s", installDir)
 		}
 	}
 
@@ -174,13 +174,13 @@ func (i *Install) saveDefault() {
 
 	f, err := os.Create(defaultFile)
 	if err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		logger.StdLog.Fatal().Err(err).Msg("Unable to create file")
 	}
 	defer f.Close() //nolint: errcheck,gosec
 
 	_, err = f.WriteString(i.Spec.Version)
 	if err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		logger.StdLog.Fatal().Err(err).Msg("Unable to write file")
 	}
 }
 
@@ -353,6 +353,8 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		}
 	}
 
+	i.SaveConfig()
+
 	if i.Spec.Default {
 		fmt.Println()
 		logger.StdLog.Info().Msgf("Creating symlink: %s\n", link)
@@ -360,22 +362,20 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		_, err := os.Stat(link)
 		if err == nil {
 			if err = os.Remove(link); err != nil {
-				logger.StdLog.Fatal().Err(err).Msg("")
+				logger.StdLog.Fatal().Err(err).Msg("Unable to remove symlink")
 			}
 		} else {
 			logger.StdLog.Debug().Msgf("file not found: %s\n", i.Metadata.Release)
 		}
 
 		if err = os.Symlink(file, link); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			logger.StdLog.Fatal().Err(err).Msg("Unable to create symlink")
 		}
 
 		i.saveDefault()
 
 		logger.SuccessLog.Info().Msgf("Done")
 	}
-
-	i.SaveConfig()
 }
 
 func (i *Install) moveFile(src string, dst string) error {
