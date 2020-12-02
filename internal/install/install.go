@@ -281,7 +281,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		out.StepTitle("Release files")
 		fmt.Println()
 
-		if checksumURL.String() != "" && checksumFileName.String() != "" {
+		if releaseData.Spec.Checksum.Check {
 			getterDownURL = fmt.Sprintf(
 				"%s?checksum=file:%s/%s",
 				downURL,

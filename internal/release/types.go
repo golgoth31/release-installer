@@ -33,6 +33,7 @@ type File struct {
 
 // Checksum ...
 type Checksum struct {
+	Check  bool
 	URL    string
 	File   string
 	Format string
