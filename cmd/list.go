@@ -104,7 +104,11 @@ to quickly create a Cobra application.`,
 					args[0],
 				)
 				logger.StdLog.Debug().Msg(instRelPath)
-				if err := filepath.Walk(instRelPath, func(path string, info os.FileInfo, err error) error {
+				_, err := os.Stat(instRelPath)
+				if err != nil {
+					logger.StdLog.Fatal().Msg("Not installed")
+				}
+				if err = filepath.Walk(instRelPath, func(path string, info os.FileInfo, err error) error {
 					if !info.IsDir() && info.Name() != "default" {
 						logger.StdLog.Debug().Msg(path)
 						files = append(files, path)
@@ -149,7 +153,7 @@ to quickly create a Cobra application.`,
 				for i := 0; i < len(list); i++ {
 					defaultVal, err := inst.GetDefault()
 					if err != nil {
-						logger.StdLog.Fatal().Err(err).Msgf("Unable to get default file")
+						logger.StdLog.Debug().Err(err).Msgf("Unable to get default file")
 					}
 
 					if defaultVal == list[i] {
