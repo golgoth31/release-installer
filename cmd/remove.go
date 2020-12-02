@@ -17,6 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/golgoth31/release-installer/internal/install"
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/cobra"
@@ -30,6 +32,10 @@ var removeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		rel := args[0]
 
+		fmt.Println()
+		out.StepTitle(fmt.Sprintf("Removing \"%s\"", rel))
+		fmt.Println()
+
 		ver, err := cmd.PersistentFlags().GetString("version")
 		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
@@ -40,7 +46,7 @@ var removeCmd = &cobra.Command{
 		if inst.IsInstalled() {
 			def, err := inst.GetDefault()
 			if err != nil {
-				logger.StdLog.Fatal().Err(err).Msg("")
+				logger.StdLog.Fatal().Err(err).Msg("No default available")
 			}
 
 			if ver == def {
@@ -49,7 +55,7 @@ var removeCmd = &cobra.Command{
 
 			inst.Delete()
 		} else {
-			logger.StdLog.Fatal().Msg("Release not installed")
+			logger.StdLog.Info().Msg("Release not installed")
 		}
 	},
 }

@@ -20,7 +20,7 @@ import (
 	getter "github.com/hashicorp/go-getter"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -222,17 +222,17 @@ func (i *Install) Delete() {
 	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
 	file := link + "_" + i.Spec.Version
 
-	logger.StdLog.Debug().Msgf("Remove binary: %s", file)
-
 	if err := os.Remove(file); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	logger.StdLog.Debug().Msgf("Remove yaml: %s", versionFile)
+	logger.SuccessLog.Info().Msgf("Remove binary file: %s", file)
 
 	if err := os.Remove(versionFile); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
+
+	logger.SuccessLog.Info().Msgf("Remove yaml manifest: %s", versionFile)
 }
 
 // Install ...
