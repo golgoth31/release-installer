@@ -188,7 +188,7 @@ func (i *Install) removeConfig(revertError error) {
 	_, versionFile, _ := i.Paths()
 
 	if err := os.Remove(versionFile); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		logger.StdLog.Debug().Err(err).Msg("")
 	}
 
 	if revertError != nil {
