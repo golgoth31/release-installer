@@ -54,34 +54,37 @@ func loadYaml(file string) *Release {
 			},
 			Available: Available{
 				Os: Os{
-					Linux: "linux",
+					Linux:  "linux",
+					Darwin: "darwin",
 				},
 				Arch: Arch{
 					Amd64: "amd64",
+					Arm64: "arm64",
+					Arm:   "armv7",
 				},
 			},
 		},
 	}
 
-	if file != "myself" {
-		yamlData.SetConfigType("yaml") // or viper.SetConfigType("YAML")
-		yamlData.SetConfigFile(fmt.Sprintf("%s/%s.yaml", releasePath, file))
-
-		if err := yamlData.ReadInConfig(); err != nil {
-			logger.StdLog.Debug().Err(err).Msg("Unable to read release definition")
-			logger.StdLog.Fatal().Msg("Unknown release")
-		}
-
-		r := &Release{}
-
-		if err := yamlData.Unmarshal(r); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
-		}
-
-		return r
+	if file == "myself" {
+		return myself
 	}
 
-	return myself
+	yamlData.SetConfigType("yaml")
+	yamlData.SetConfigFile(fmt.Sprintf("%s/%s.yaml", releasePath, file))
+
+	if err := yamlData.ReadInConfig(); err != nil {
+		logger.StdLog.Debug().Err(err).Msg("Unable to read release definition")
+		logger.StdLog.Fatal().Msg("Unknown release")
+	}
+
+	r := &Release{}
+
+	if err := yamlData.Unmarshal(r); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
+
+	return r
 }
 
 // ListVersions ...
