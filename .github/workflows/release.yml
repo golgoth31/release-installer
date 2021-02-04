@@ -22,31 +22,3 @@ jobs:
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Docker hub
-      #   uses: docker/build-push-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKER_USERNAME }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
-      #     repository: golgoth31/ri
-      #     tags: amd64
-      #     push: ${{ startsWith(github.ref, 'refs/tags/') }}
-      #     dockerfile: build/amd64.dockerfile
-      #     add_git_labels: true
-      # - name: Docker hub
-      #   uses: docker/build-push-action@v1
-      #   with:
-      #     username: ${{ secrets.DOCKER_USERNAME }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
-      #     repository: golgoth31/ri
-      #     tags: arm64
-      #     push: ${{ startsWith(github.ref, 'refs/tags/') }}
-      #     dockerfile: build/arm64.dockerfile
-      #     add_git_labels: true
-      # - name: Multiarch
-      #   run: |
-      #     curl -Lo manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.2/manifest-tool-linux-amd64
-      #     chmod +x manifest-tool
-      #     docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      #     version=$(git describe --tags --always || git rev-parse --short HEAD)
-      #     echo "tags: ['$version']" >> build/manifest.yaml
-      #     ./manifest-tool push from-spec build/manifest.yaml

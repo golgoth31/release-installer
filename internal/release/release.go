@@ -53,10 +53,10 @@ func loadYaml(file string) *Release {
 				Format: "sha256",
 			},
 			Available: Available{
-				Os: Os{ //nolint:go-lint
+				Os: Os{
 					Linux: "linux",
 				},
-				Arch: Arch{ //nolint:go-lint
+				Arch: Arch{
 					Amd64: "amd64",
 				},
 			},

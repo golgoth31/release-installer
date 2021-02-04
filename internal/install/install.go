@@ -4,6 +4,7 @@ package install
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -38,27 +39,37 @@ func (i *Install) templates() (
 	revertError error) {
 	revertError = nil
 	// template strings
-	treleaseURL := template.Must(template.New("releaseURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.URL))
+	treleaseURL := template.Must(
+		template.New("releaseURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.URL),
+	)
 	if err := treleaseURL.Execute(&releaseURL, i.Spec); err != nil {
 		revertError = err
 	}
 
-	treleaseFileName := template.Must(template.New("releaseFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.Src))
+	treleaseFileName := template.Must(
+		template.New("releaseFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.Src),
+	)
 	if err := treleaseFileName.Execute(&releaseFileName, i.Spec); err != nil {
 		revertError = err
 	}
 
-	tchecksumURL := template.Must(template.New("checksumURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.URL))
+	tchecksumURL := template.Must(
+		template.New("checksumURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.URL),
+	)
 	if err := tchecksumURL.Execute(&checksumURL, i.Spec); err != nil {
 		revertError = err
 	}
 
-	tchecksumFileName := template.Must(template.New("checksumFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.File))
+	tchecksumFileName := template.Must(
+		template.New("checksumFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.File),
+	)
 	if err := tchecksumFileName.Execute(&checksumFileName, i.Spec); err != nil {
 		revertError = err
 	}
 
-	tbinaryPath := template.Must(template.New("binaryPath").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.BinaryPath))
+	tbinaryPath := template.Must(
+		template.New("binaryPath").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.BinaryPath),
+	)
 	if err := tbinaryPath.Execute(&binaryPath, i.Spec); err != nil {
 		revertError = err
 	}
@@ -111,7 +122,7 @@ func (i *Install) GetDefault() (string, error) {
 	if err != nil {
 		logger.StdLog.Debug().Err(err).Msg("Reading default file")
 
-		return "", err
+		return "", fmt.Errorf("%w", err)
 	}
 
 	logger.StdLog.Debug().Msgf("default data: %s", data)
@@ -119,6 +130,7 @@ func (i *Install) GetDefault() (string, error) {
 	return string(data), nil
 }
 
+// PAths returns various path.
 func (i *Install) Paths() (installDir string, versionFile string, defaultFile string) {
 	installDir = fmt.Sprintf(
 		"%s/%s/%s",
@@ -142,6 +154,7 @@ func (i *Install) Paths() (installDir string, versionFile string, defaultFile st
 	return
 }
 
+// SaveConfig saves configuration of installed release
 func (i *Install) SaveConfig() {
 	installDir, versionFile, _ := i.Paths()
 
@@ -176,7 +189,12 @@ func (i *Install) saveDefault() {
 	if err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("Unable to create file")
 	}
-	defer f.Close() //nolint: errcheck,gosec
+
+	defer func() {
+		if ferr := f.Close(); ferr != nil {
+			logger.StdLog.Fatal().Err(ferr).Msg("Failed to close file")
+		}
+	}()
 
 	_, err = f.WriteString(i.Spec.Version)
 	if err != nil {
@@ -260,7 +278,10 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 			i.removeConfig(revertError)
 		}
 
-		var srcFile string
+		var (
+			srcFile    string
+			unknownErr = errors.New("Unknown release mode")
+		)
 
 		switch releaseData.Spec.File.Mode {
 		case "file":
@@ -268,7 +289,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		case "archive":
 			srcFile = releaseData.Spec.File.Binary
 		default:
-			i.removeConfig(fmt.Errorf("Unknown release mode"))
+			i.removeConfig(fmt.Errorf("%w", unknownErr))
 		}
 
 		downURL := fmt.Sprintf(
@@ -301,9 +322,9 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		out.StepTitle("Downloading files")
 		fmt.Println()
 
-		pwd, err := os.Getwd()
-		if err != nil {
-			i.removeConfig(err)
+		pwd, osErr := os.Getwd()
+		if osErr != nil {
+			i.removeConfig(osErr)
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
@@ -312,7 +333,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		// Build the client
 		opts := []getter.ClientOption{}
 		opts = append(opts, getter.WithProgress(defaultProgressBar))
-		client := &getter.Client{ //nolint:go-lint
+		client := &getter.Client{
 			Ctx:     ctx,
 			Src:     getterDownURL,
 			Dst:     "/tmp",
@@ -383,7 +404,12 @@ func (i *Install) moveFile(src string, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+
+	defer func() {
+		if ferr := in.Close(); ferr != nil {
+			logger.StdLog.Fatal().Err(ferr).Msg("Failed to close file")
+		}
+	}()
 
 	out, err := os.Create(dst)
 	if err != nil {
@@ -391,8 +417,8 @@ func (i *Install) moveFile(src string, dst string) error {
 	}
 
 	defer func() {
-		if e := out.Close(); e != nil {
-			err = e
+		if ferr := out.Close(); ferr != nil {
+			logger.StdLog.Fatal().Err(ferr).Msg("Failed to close file")
 		}
 	}()
 

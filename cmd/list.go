@@ -6,24 +6,16 @@ import (
 	"path/filepath"
 
 	"github.com/golgoth31/release-installer/internal/install"
-	"github.com/golgoth31/release-installer/internal/release"
-
 	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/golgoth31/release-installer/internal/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command.
-var listCmd = &cobra.Command{ //nolint:go-lint
+var listCmd = &cobra.Command{
 	Use:   "list [release name]",
 	Short: "List available releases or versions",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Args: cobra.MaximumNArgs(1),
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var files, list []string
 
@@ -171,6 +163,6 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(listCmd)
 
-	listCmd.PersistentFlags().BoolP("installed", "i", false, "Show installed releases")
+	listCmd.PersistentFlags().BoolP("installed", "i", false, "Show installed releases only")
 	listCmd.PersistentFlags().IntP("number", "n", 5, "Number of releases or versions to show")
 }

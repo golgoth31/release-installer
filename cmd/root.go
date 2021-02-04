@@ -15,14 +15,11 @@ import (
 
 var cfgFile string
 
-// rootCmd represents the base command when called without any subcommands.
-var rootCmd = &cobra.Command{ //nolint:go-lint
+var rootCmd = &cobra.Command{
 	Use:   "ri [command]",
 	Short: "A tool to download and install binaries",
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

@@ -12,7 +12,12 @@ import (
 const pbWidth = 200
 
 // TrackProgress generates a progress bar.
-func (cpb *ProgressBar) TrackProgress(src string, currentSize, totalSize int64, stream io.ReadCloser) io.ReadCloser { // nolint:go-lint
+func (cpb *ProgressBar) TrackProgress(
+	src string,
+	currentSize,
+	totalSize int64,
+	stream io.ReadCloser,
+) io.ReadCloser {
 	cpb.lock.Lock()
 	defer cpb.lock.Unlock()
 

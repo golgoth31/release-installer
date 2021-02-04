@@ -10,9 +10,13 @@ By default, the known descriptions will be put in ~/.release-installer/releases.
 
 ## How to use it
 
-For the first run, download the needed binary file from the release page and run the init command. Once installed, ri will be able to auto update (binary and yaml definitions).
+For the first run, download the needed binary file from the release page and run the init command. Once installed, **_ri_** will be able to auto update (binary and yaml definitions).
 
 ```txt
+$ ri -h
+
+A tool to download and install binaries
+
 Usage:
   ri [command]
 
@@ -20,8 +24,7 @@ Available Commands:
   help        Help about any command
   init        Initialize release-installer
   install     Install one release
-  release     List available version of a release
-  releases    List available releases
+  list        List available releases or versions
   remove      Remove a specific release version
   update      Update the releases definitions
   version     Show the ro=i version
@@ -34,9 +37,14 @@ Flags:
 Use "ri [command] --help" for more information about a command.
 ```
 
+
 ### Install a release
 
 ```txt
+$ ri install -h
+
+Install one release
+
 Usage:
   ri install [release] [flags]
 
@@ -89,4 +97,76 @@ Result:
 √ Done
 
  √ Release installed
+```
+
+### list releases
+
+```txt
+$ ri list -h
+
+Usage:
+  ri list [release name] [flags]
+
+Flags:
+  -h, --help         help for list
+  -i, --installed    Show installed releases only
+  -n, --number int   Number of releases or versions to show (default 5)
+
+Global Flags:
+      --config string   config file (default is $HOME/.release-installer/release-installer.yaml)
+      --debug           debug
+```
+
+#### list all known releases
+
+```bash
+$ ri list
+
+ Available releases
+
+√ dive (v0.9.2)
+» eksctl
+√ gitcomm (v0.3.4)
+» github-cli
+√ goreleaser (v0.147.2)
+√ helm (v3.4.0)
+√ istioctl (1.7.4)
+» kubectl-argo-rollouts
+» skaffold
+√ stern (v1.13.1)
+√ terraform (0.13.5)
+```
+
+#### list all versions for one releases
+
+```bash
+$ ri list terraform
+
+ Available versions for release "terraform"
+
+» v0.14.6
+» v0.15.0-alpha20210127
+» v0.14.5
+» v0.15.0-alpha20210107
+» v0.14.4
+```
+
+### Update myself
+
+```bash
+$ ri update -h
+
+Update the releases definitions
+
+Usage:
+  ri update [flags]
+
+Flags:
+  -f, --force         Force update
+  -h, --help          help for update
+  -p, --path string   Destination to install binary in, should be set in your "$PATH" (default "~/bin")
+
+Global Flags:
+      --config string   config file (default is $HOME/.release-installer/release-installer.yaml)
+      --debug           debug
 ```

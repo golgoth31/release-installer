@@ -11,8 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// initCmd represents the init command.
-var initCmd = &cobra.Command{ //nolint:go-lint
+var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize release-installer",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,11 +42,12 @@ var initCmd = &cobra.Command{ //nolint:go-lint
 		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
+
 		opts := []getter.ClientOption{}
-		// opts = append(opts, getter.WithProgress(defaultProgressBar))
-		client := &getter.Client{ //nolint:go-lint
-			Ctx:     ctx,
-			Src:     "https://github.com/golgoth31/release-installer-definitions/releases/download/latest/ri-releases-definitions.tar.gz",
+		client := &getter.Client{
+			Ctx: ctx,
+			Src: "https://github.com/golgoth31/release-installer-definitions/" +
+				"releases/download/latest/ri-releases-definitions.tar.gz",
 			Dst:     releasePath,
 			Pwd:     pwd,
 			Mode:    getter.ClientModeAny,

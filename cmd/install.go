@@ -17,8 +17,7 @@ var (
 	installConfig *viper.Viper
 )
 
-// installCmd represents the install command.
-var installCmd = &cobra.Command{ //nolint:go-lint
+var installCmd = &cobra.Command{
 	Use:   "install [release]",
 	Short: "Install one release",
 	Args:  cobra.ExactArgs(1),

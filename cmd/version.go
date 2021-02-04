@@ -25,7 +25,7 @@ import (
 // versionCmd represents the couchdb command.
 var versionCmd = &cobra.Command{ //nolint:go-lint
 	Use:   "version",
-	Short: "Show the ro=i version",
+	Short: "Show the ri version",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf(
 			"Version: %v\nBuild date: %v\nBuild by: %s\n",

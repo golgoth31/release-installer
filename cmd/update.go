@@ -15,10 +15,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// updateCmd represents the update command.
-var updateCmd = &cobra.Command{ //nolint:go-lint
+var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update the releases definitions",
+	Short: "Update my binary and the releases definitions",
 	Run: func(cmd *cobra.Command, args []string) {
 		rel := release.New("myself")
 		list := rel.ListVersions(1)
@@ -66,10 +65,10 @@ var updateCmd = &cobra.Command{ //nolint:go-lint
 		}
 
 		opts := []getter.ClientOption{}
-		// opts = append(opts, getter.WithProgress(defaultProgressBar))
-		client := &getter.Client{ //nolint:go-lint
-			Ctx:     ctx,
-			Src:     "https://github.com/golgoth31/release-installer-definitions/releases/download/latest/ri-releases-definitions.tar.gz",
+		client := &getter.Client{
+			Ctx: ctx,
+			Src: "https://github.com/golgoth31/release-installer-definitions/" +
+				"releases/download/latest/ri-releases-definitions.tar.gz",
 			Dst:     releasePath,
 			Pwd:     pwd,
 			Mode:    getter.ClientModeAny,
@@ -95,5 +94,5 @@ func init() {
 		"Destination to install binary in, should be set in your \"$PATH\"",
 	)
 
-	updateCmd.PersistentFlags().BoolP("force", "f", false, "Force release install")
+	updateCmd.PersistentFlags().BoolP("force", "f", false, "Force update")
 }
