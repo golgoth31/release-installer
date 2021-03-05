@@ -36,6 +36,7 @@ func (i *Install) templates() (
 	checksumURL bytes.Buffer,
 	checksumFileName bytes.Buffer,
 	binaryPath bytes.Buffer,
+	binaryFile bytes.Buffer,
 	revertError error) {
 	revertError = nil
 	// template strings
@@ -74,7 +75,14 @@ func (i *Install) templates() (
 		revertError = err
 	}
 
-	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError
+	tbinaryFile := template.Must(
+		template.New("binaryFile").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.Binary),
+	)
+	if err := tbinaryFile.Execute(&binaryFile, i.Spec); err != nil {
+		revertError = err
+	}
+
+	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, binaryFile, revertError
 }
 
 // SetArch ...
@@ -234,10 +242,22 @@ func (i *Install) Get() {
 
 // Delete ...
 func (i *Install) Delete() {
+	var link string
+
 	i.Get()
 	_, versionFile, _ := i.Paths()
 
-	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
+	_, _, _, _, _, binaryFile, revertError := i.templates()
+	if revertError != nil {
+		i.removeConfig(revertError)
+	}
+
+	if releaseData.Spec.File.Link == "" {
+		link = i.Spec.Path + "/" + binaryFile.String()
+	} else {
+		link = i.Spec.Path + "/" + releaseData.Spec.File.Link
+	}
+
 	file := link + "_" + i.Spec.Version
 
 	if err := os.Remove(file); err != nil {
@@ -258,6 +278,8 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 	// define getter opts
 	var err error
 
+	var link string
+
 	i.Spec.Arch = i.setRealValues("Arch")
 	i.Spec.Os = i.setRealValues("Os")
 
@@ -269,15 +291,20 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	link := i.Spec.Path + "/" + releaseData.Spec.File.Binary
+	releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, binaryFile, revertError := i.templates()
+	if revertError != nil {
+		i.removeConfig(revertError)
+	}
+
+	if releaseData.Spec.File.Link == "" {
+		link = i.Spec.Path + "/" + binaryFile.String()
+	} else {
+		link = i.Spec.Path + "/" + releaseData.Spec.File.Link
+	}
+
 	file := link + "_" + i.Spec.Version
 
 	if !i.IsInstalled() || force {
-		releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, revertError := i.templates()
-		if revertError != nil {
-			i.removeConfig(revertError)
-		}
-
 		var (
 			srcFile    string
 			unknownErr = errors.New("Unknown release mode")
@@ -287,7 +314,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		case "file":
 			srcFile = releaseFileName.String()
 		case "archive":
-			srcFile = releaseData.Spec.File.Binary
+			srcFile = binaryFile.String()
 		default:
 			i.removeConfig(fmt.Errorf("%w", unknownErr))
 		}

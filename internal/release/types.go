@@ -29,6 +29,7 @@ type File struct {
 	Binary     string
 	Mode       string
 	BinaryPath string
+	Link       string
 }
 
 // Checksum ...
