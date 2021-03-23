@@ -24,6 +24,11 @@ var listCmd = &cobra.Command{
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
+		noFormat, err := cmd.Flags().GetBool("noformat")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
 		number, err := cmd.Flags().GetInt("number")
 		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
@@ -42,10 +47,9 @@ var listCmd = &cobra.Command{
 		yamlData := viper.New()
 		yamlData.SetConfigType("yaml")
 
-		fmt.Println()
 		if len(args) == 0 {
 			inst := install.Install{}
-
+			fmt.Println()
 			if installed {
 				out.StepTitle("Installed releases")
 			} else {
@@ -84,8 +88,10 @@ var listCmd = &cobra.Command{
 					}
 				}
 			}
+			fmt.Println()
 		} else {
 			if installed {
+				fmt.Println()
 				out.StepTitle(fmt.Sprintf("Installed versions for release \"%s\"", args[0]))
 				fmt.Println()
 
@@ -133,12 +139,15 @@ var listCmd = &cobra.Command{
 						logger.StdLog.Info().Msg(inst.Spec.Version)
 					}
 				}
+				fmt.Println()
 			} else {
 				inst := install.NewInstall(args[0])
 				rel := release.New(args[0])
-				out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", rel.Metadata.Name))
-
-				fmt.Println()
+				if !noFormat {
+					fmt.Println()
+					out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", rel.Metadata.Name))
+					fmt.Println()
+				}
 
 				list = rel.ListVersions(number)
 
@@ -148,15 +157,21 @@ var listCmd = &cobra.Command{
 						logger.StdLog.Debug().Err(err).Msgf("Unable to get default file")
 					}
 
-					if defaultVal == list[i] {
-						logger.SuccessLog.Info().Msg(list[i])
+					if !noFormat {
+						if defaultVal == list[i] {
+							logger.SuccessLog.Info().Msg(list[i])
+						} else {
+							logger.StdLog.Info().Msg(list[i])
+						}
 					} else {
-						logger.StdLog.Info().Msg(list[i])
+						logger.StepLog.Info().Msg(list[i])
 					}
+				}
+				if !noFormat {
+					fmt.Println()
 				}
 			}
 		}
-		fmt.Println()
 	},
 }
 
@@ -165,4 +180,5 @@ func init() {
 
 	listCmd.PersistentFlags().BoolP("installed", "i", false, "Show installed releases only")
 	listCmd.PersistentFlags().IntP("number", "n", 5, "Number of releases or versions to show")
+	listCmd.PersistentFlags().Bool("noformat", false, "remove formating")
 }
