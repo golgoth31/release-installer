@@ -462,5 +462,9 @@ func (i *Install) moveFile(src string, dst string) error {
 		i.removeConfig(err)
 	}
 
+	if err = os.Remove(src); err != nil {
+		return err
+	}
+
 	return nil
 }
