@@ -15,14 +15,14 @@ import (
 
 var cfgFile string
 
-var rootCmd = &cobra.Command{
+var rootCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "ri [command]",
 	Short: "A tool to download and install binaries",
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		logger.StdLog.Err(err).Msg("")
 		os.Exit(1)
 	}
 }
@@ -63,8 +63,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 		homedir = fmt.Sprintf("%s/.release-installer", home)
 		// Search config in home directory with name ".release-installer" (without extension).

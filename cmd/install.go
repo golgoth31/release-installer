@@ -7,7 +7,6 @@ import (
 	"github.com/golgoth31/release-installer/internal/install"
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/golgoth31/release-installer/internal/output"
-	"github.com/logrusorgru/aurora/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -17,7 +16,7 @@ var (
 	installConfig *viper.Viper
 )
 
-var installCmd = &cobra.Command{
+var installCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "install [release]",
 	Short: "Install one release",
 	Args:  cobra.ExactArgs(1),
@@ -34,22 +33,21 @@ var installCmd = &cobra.Command{
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		fmt.Println()
+		logger.JumpLine()
 		out.StepTitle(fmt.Sprintf("Installing \"%s\"", rel))
-		fmt.Println()
+		logger.JumpLine()
 		logger.StdLog.Info().Msg("Requested:")
 		logger.StdLog.Info().Msgf("  Version: %s", inst.Spec.Version)
 		logger.StdLog.Info().Msgf("  OS:      %s", inst.Spec.Os)
 		logger.StdLog.Info().Msgf("  Arch:    %s", inst.Spec.Arch)
 		logger.StdLog.Info().Msgf("  Default: %t", inst.Spec.Default)
 		logger.StdLog.Info().Msgf("  Path:    %s", inst.Spec.Path)
-		fmt.Println()
+		logger.JumpLine()
 
 		inst.Install(force)
 
-		fmt.Println()
-		fmt.Printf(" %v", aurora.Bold(logger.OkStatus()))
-		out.StepTitle(
+		logger.JumpLine()
+		out.Success(
 			"Release installed",
 		)
 	},

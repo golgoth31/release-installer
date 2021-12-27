@@ -14,5 +14,12 @@ func NewInstall(rel string) *Install {
 		Metadata: Metadata{
 			Release: rel,
 		},
+		Spec: Spec{
+			Version: "",
+			Os:      "",
+			Arch:    "",
+			Path:    "",
+			Default: false,
+		},
 	}
 }

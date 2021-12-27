@@ -8,16 +8,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var removeCmd = &cobra.Command{
+var removeCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "remove",
 	Short: "Remove a specific release version",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		rel := args[0]
 
-		fmt.Println()
+		logger.JumpLine()
 		out.StepTitle(fmt.Sprintf("Removing \"%s\"", rel))
-		fmt.Println()
+		logger.JumpLine()
 
 		ver, err := cmd.PersistentFlags().GetString("version")
 		if err != nil {

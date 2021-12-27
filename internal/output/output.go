@@ -8,5 +8,10 @@ import (
 
 // StepTitle ...
 func (o *Output) StepTitle(str string) {
-	logger.StepLog.Error().Msgf(" %v", aurora.Bold(str).Underline())
+	logger.StepLog.Info().Msgf(" %v", aurora.Bold(str).Underline())
+}
+
+// Success ...
+func (o *Output) Success(str string) {
+	logger.StepLog.Info().Msgf(" %v %v", aurora.Bold(logger.OkStatus()), aurora.Bold(str).Underline())
 }

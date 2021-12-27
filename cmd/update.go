@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var updateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "update",
 	Short: "Update my binary and the releases definitions",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -29,7 +29,7 @@ var updateCmd = &cobra.Command{
 
 		if configs.Version != list[0] || force {
 			out.StepTitle("Updating ri binary")
-			fmt.Println()
+			logger.JumpLine()
 
 			path, errFlag := cmd.PersistentFlags().GetString("path")
 			if errFlag != nil {
@@ -47,7 +47,7 @@ var updateCmd = &cobra.Command{
 			out.StepTitle("No need to update ri binary")
 		}
 
-		fmt.Println()
+		logger.JumpLine()
 		out.StepTitle("Updating releases definitions")
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -65,7 +65,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		opts := []getter.ClientOption{}
-		client := &getter.Client{
+		client := &getter.Client{ //nolint:exhaustivestruct
 			Ctx: ctx,
 			Src: "https://github.com/golgoth31/release-installer-definitions/" +
 				"releases/download/latest/ri-releases-definitions.tar.gz",
@@ -79,7 +79,7 @@ var updateCmd = &cobra.Command{
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		fmt.Println()
+		logger.JumpLine()
 		logger.SuccessLog.Info().Msg("Done")
 	},
 }

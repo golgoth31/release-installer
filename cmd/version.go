@@ -16,18 +16,17 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/golgoth31/release-installer/configs"
+	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/cobra"
 )
 
 // versionCmd represents the couchdb command.
-var versionCmd = &cobra.Command{ //nolint:go-lint
+var versionCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "version",
 	Short: "Show the ri version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf(
+		logger.StepLog.Info().Msgf(
 			"Version: %v\nBuild date: %v\nBuild by: %s\n",
 			configs.Version,
 			configs.Date,

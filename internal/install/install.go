@@ -6,14 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 
-	"github.com/Masterminds/sprig/v3"
 	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/golgoth31/release-installer/internal/output"
 	"github.com/golgoth31/release-installer/internal/progressbar"
@@ -28,62 +26,12 @@ var (
 	releaseData        *release.Release
 	defaultProgressBar getter.ProgressTracker = &progressbar.ProgressBar{}
 	out                output.Output
+	errUnknown         = errors.New("Unknown release mode")
 )
 
-func (i *Install) templates() (
-	releaseURL bytes.Buffer,
-	releaseFileName bytes.Buffer,
-	checksumURL bytes.Buffer,
-	checksumFileName bytes.Buffer,
-	binaryPath bytes.Buffer,
-	binaryFile bytes.Buffer,
-	revertError error) {
-	revertError = nil
-	// template strings
-	treleaseURL := template.Must(
-		template.New("releaseURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.URL),
-	)
-	if err := treleaseURL.Execute(&releaseURL, i.Spec); err != nil {
-		revertError = err
-	}
-
-	treleaseFileName := template.Must(
-		template.New("releaseFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.Src),
-	)
-	if err := treleaseFileName.Execute(&releaseFileName, i.Spec); err != nil {
-		revertError = err
-	}
-
-	tchecksumURL := template.Must(
-		template.New("checksumURL").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.URL),
-	)
-	if err := tchecksumURL.Execute(&checksumURL, i.Spec); err != nil {
-		revertError = err
-	}
-
-	tchecksumFileName := template.Must(
-		template.New("checksumFileName").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.Checksum.File),
-	)
-	if err := tchecksumFileName.Execute(&checksumFileName, i.Spec); err != nil {
-		revertError = err
-	}
-
-	tbinaryPath := template.Must(
-		template.New("binaryPath").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.BinaryPath),
-	)
-	if err := tbinaryPath.Execute(&binaryPath, i.Spec); err != nil {
-		revertError = err
-	}
-
-	tbinaryFile := template.Must(
-		template.New("binaryFile").Funcs(sprig.FuncMap()).Parse(releaseData.Spec.File.Binary),
-	)
-	if err := tbinaryFile.Execute(&binaryFile, i.Spec); err != nil {
-		revertError = err
-	}
-
-	return releaseURL, releaseFileName, checksumURL, checksumFileName, binaryPath, binaryFile, revertError
-}
+const (
+	dirPerms os.FileMode = 0750
+)
 
 // SetArch ...
 func (i *Install) setRealValues(field string) (val string) {
@@ -114,8 +62,7 @@ func (i *Install) IsInstalled() bool {
 
 	logger.StdLog.Debug().Msgf("Release install file: %s", versionPath)
 
-	_, err := os.Stat(versionPath)
-	if err != nil {
+	if _, err := os.Stat(versionPath); err != nil {
 		return false
 	}
 
@@ -138,7 +85,7 @@ func (i *Install) GetDefault() (string, error) {
 	return string(data), nil
 }
 
-// PAths returns various path.
+// Paths returns various path.
 func (i *Install) Paths() (installDir string, versionFile string, defaultFile string) {
 	installDir = fmt.Sprintf(
 		"%s/%s/%s",
@@ -167,7 +114,7 @@ func (i *Install) SaveConfig() {
 	installDir, versionFile, _ := i.Paths()
 
 	if _, err := os.Stat(installDir); err != nil {
-		if err = os.MkdirAll(installDir, 0o750); err != nil {
+		if err = os.MkdirAll(installDir, dirPerms); err != nil {
 			logger.StdLog.Fatal().Err(err).Msgf("Unable to create directory: %s", installDir)
 		}
 	}
@@ -306,8 +253,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 
 	if !i.IsInstalled() || force {
 		var (
-			srcFile    string
-			unknownErr = errors.New("Unknown release mode")
+			srcFile string
 		)
 
 		switch releaseData.Spec.File.Mode {
@@ -316,7 +262,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		case "archive":
 			srcFile = binaryFile.String()
 		default:
-			i.removeConfig(fmt.Errorf("%w", unknownErr))
+			i.removeConfig(fmt.Errorf("%w", errUnknown))
 		}
 
 		downURL := fmt.Sprintf(
@@ -327,7 +273,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		getterDownURL := downURL
 
 		out.StepTitle("Release files")
-		fmt.Println()
+		logger.JumpLine()
 
 		if releaseData.Spec.Checksum.Check {
 			getterDownURL = fmt.Sprintf(
@@ -345,9 +291,9 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 
 		logger.StdLog.Info().Msgf("Archive file:  %s", downURL)
 
-		fmt.Println()
+		logger.JumpLine()
 		out.StepTitle("Downloading files")
-		fmt.Println()
+		logger.JumpLine()
 
 		pwd, osErr := os.Getwd()
 		if osErr != nil {
@@ -381,7 +327,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 			i.removeConfig(err)
 		}
 
-		fmt.Println()
+		logger.JumpLine()
 		logger.SuccessLog.Info().Msgf("File saved as: %s", file)
 	} else {
 		out.StepTitle("This version is already installed")
@@ -404,7 +350,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 	i.SaveConfig()
 
 	if i.Spec.Default {
-		fmt.Println()
+		logger.JumpLine()
 		logger.StdLog.Info().Msgf("Creating symlink: %s\n", link)
 
 		_, err := os.Stat(link)
@@ -429,7 +375,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 func (i *Install) moveFile(src string, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	defer func() {
@@ -440,7 +386,7 @@ func (i *Install) moveFile(src string, dst string) error {
 
 	out, err := os.Create(dst)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	defer func() {
@@ -451,19 +397,19 @@ func (i *Install) moveFile(src string, dst string) error {
 
 	_, err = io.Copy(out, in)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	if err = out.Sync(); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
-	if err = os.Chmod(dst, 0o750); err != nil { //nolint: gosec
+	if err = os.Chmod(dst, dirPerms); err != nil {
 		i.removeConfig(err)
 	}
 
 	if err = os.Remove(src); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	return nil
