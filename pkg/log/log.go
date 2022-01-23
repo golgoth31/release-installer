@@ -50,11 +50,6 @@ func InfoStatus() string {
 	return fmt.Sprint(aurora.Blue("\u00BB")) // ×
 }
 
-// JumpLine ...
-func JumpLine() {
-	StepLog.Info().Msg("")
-}
-
 // Initialize ...
 func Initialize() {
 	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout}

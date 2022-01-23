@@ -16,8 +16,9 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/golgoth31/release-installer/configs"
-	logger "github.com/golgoth31/release-installer/internal/log"
 	"github.com/spf13/cobra"
 )
 
@@ -26,11 +27,13 @@ var versionCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "version",
 	Short: "Show the ri version",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.StepLog.Info().Msgf(
-			"Version: %v\nBuild date: %v\nBuild by: %s\n",
-			configs.Version,
-			configs.Date,
-			configs.BuiltBy,
+		out.NoFormat(
+			fmt.Sprintf(
+				"Version: %v\nBuild date: %v\nBuild by: %s\n",
+				configs.Version,
+				configs.Date,
+				configs.BuiltBy,
+			),
 		)
 	},
 }

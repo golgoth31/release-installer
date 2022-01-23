@@ -4,49 +4,65 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/output"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var (
-	out           output.Output
-	installConfig *viper.Viper
-)
+var installConfig *viper.Viper
 
 var installCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "install [release]",
 	Short: "Install one release",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		rel := args[0]
-
 		force, err := cmd.PersistentFlags().GetBool("force")
 		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		inst := install.NewInstall(rel)
-		if err := installConfig.Unmarshal(inst); err != nil {
+		version, err := cmd.PersistentFlags().GetString("version")
+		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		logger.JumpLine()
-		out.StepTitle(fmt.Sprintf("Installing \"%s\"", rel))
-		logger.JumpLine()
+		inst := release.New(conf, args[0], version)
+
+		inst.Rel.Spec.Arch, err = cmd.PersistentFlags().GetString("arch")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
+		inst.Rel.Spec.Os, err = cmd.PersistentFlags().GetString("os")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
+		inst.Rel.Spec.Path, err = cmd.PersistentFlags().GetString("path")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
+		inst.Rel.Spec.Default, err = cmd.PersistentFlags().GetBool("default")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("")
+		}
+
+		out.JumpLine()
+		out.StepTitle(fmt.Sprintf("Installing \"%s\"", args[0]))
+		out.JumpLine()
 		logger.StdLog.Info().Msg("Requested:")
-		logger.StdLog.Info().Msgf("  Version: %s", inst.Spec.Version)
-		logger.StdLog.Info().Msgf("  OS:      %s", inst.Spec.Os)
-		logger.StdLog.Info().Msgf("  Arch:    %s", inst.Spec.Arch)
-		logger.StdLog.Info().Msgf("  Default: %t", inst.Spec.Default)
-		logger.StdLog.Info().Msgf("  Path:    %s", inst.Spec.Path)
-		logger.JumpLine()
+		logger.StdLog.Info().Msgf("  Version: %s", inst.Rel.Spec.GetVersion())
+		logger.StdLog.Info().Msgf("  OS:      %s", inst.Rel.Spec.GetOs())
+		logger.StdLog.Info().Msgf("  Arch:    %s", inst.Rel.Spec.GetArch())
+		logger.StdLog.Info().Msgf("  Default: %t", inst.Rel.Spec.GetDefault())
+		logger.StdLog.Info().Msgf("  Path:    %s", inst.Rel.Spec.GetPath())
+		out.JumpLine()
 
 		inst.Install(force)
 
-		logger.JumpLine()
+		out.JumpLine()
 		out.Success(
 			"Release installed",
 		)
@@ -76,9 +92,9 @@ func init() {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	if err := installConfig.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version")); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
-	}
+	// if err := installConfig.BindPFlag("spec.version", installCmd.PersistentFlags().Lookup("version")); err != nil {
+	// 	logger.StdLog.Fatal().Err(err).Msg("")
+	// }
 
 	installCmd.PersistentFlags().StringP(
 		"path",

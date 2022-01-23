@@ -5,20 +5,31 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/golgoth31/release-installer/internal/config"
-	logger "github.com/golgoth31/release-installer/internal/log"
+	internalConfig "github.com/golgoth31/release-installer/internal/config"
+	defaultConfig "github.com/golgoth31/release-installer/internal/default"
+	"github.com/golgoth31/release-installer/pkg/config"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/output"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	out     output.Output
+	conf    *config.Config
+	rootCmd = &cobra.Command{ //nolint:exhaustivestruct
+		Use:   "ri [command]",
+		Short: "A tool to download and install binaries",
+		Run:   func(cmd *cobra.Command, args []string) {},
+	}
+)
 
-var rootCmd = &cobra.Command{ //nolint:exhaustivestruct
-	Use:   "ri [command]",
-	Short: "A tool to download and install binaries",
-}
+const (
+	dirPerms os.FileMode = 0750
+)
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -36,6 +47,10 @@ func init() {
 		"",
 		"config file (default is $HOME/.release-installer/release-installer.yaml)")
 	rootCmd.PersistentFlags().Bool("debug", false, "debug")
+
+	if err := viper.BindPFlag("cfgFile", rootCmd.PersistentFlags().Lookup("config")); err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -78,14 +93,16 @@ func initConfig() {
 	} else {
 		logger.StdLog.Debug().Msg("Config file not found, saving default")
 
-		if err := os.Mkdir(homedir, 0750); err != nil {
+		if err := os.Mkdir(homedir, dirPerms); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 	}
 
-	config.SetDefault(homedir)
+	defaultConfig.SetDefault(homedir)
 
 	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
+
+	conf = internalConfig.Load()
 }

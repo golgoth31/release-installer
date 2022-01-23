@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package ri.common;
+option go_package = "github.com/golgoth31/release-installer/pkg/proto/common;common_proto";
+
+message Metadata {
+  string name = 1;
+  string web = 2;
+}

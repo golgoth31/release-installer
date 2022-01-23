@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/release"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/reference"
+	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -21,6 +21,7 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Short: "List available releases or versions",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		// var files []string
 		var files, list []string
 
 		installed, err := cmd.Flags().GetBool("installed")
@@ -37,32 +38,24 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
-		releasePath := fmt.Sprintf(
-			"%s/%s",
-			viper.GetString("homedir"),
-			viper.GetString("releases.dir"),
-		)
-		installPath := fmt.Sprintf(
-			"%s/%s",
-			viper.GetString("homedir"),
-			viper.GetString("install.dir"),
-		)
-		// inst := install.Install{}
+
 		yamlData := viper.New()
 		yamlData.SetConfigType("yaml")
 
 		if len(args) == 0 {
-			inst := install.Install{} //nolint:exhaustivestruct
-			logger.JumpLine()
+			// List all available references
+			ref := reference.Reference{}
+
+			out.JumpLine()
 			if installed {
 				out.StepTitle("Installed releases")
 			} else {
 				out.StepTitle("Available releases")
 			}
 
-			logger.JumpLine()
+			out.JumpLine()
 
-			if err := filepath.Walk(releasePath, func(path string, info os.FileInfo, err error) error {
+			if err := filepath.Walk(conf.Reference.Path, func(path string, info os.FileInfo, err error) error {
 				if !info.IsDir() {
 					files = append(files, path)
 				}
@@ -73,44 +66,43 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 			}
 
 			for _, file := range files {
-				yamlData.SetConfigFile(file)
-
-				if err := yamlData.ReadInConfig(); err != nil {
+				logger.StdLog.Debug().Msgf("Reading file: %s", file)
+				ref.File = file
+				if err := ref.Load(); err != nil {
 					logger.StdLog.Fatal().Err(err).Msg("")
 				}
-				inst.Metadata.Release = yamlData.GetString("metadata.name")
-				defaultVal, err := inst.GetDefault()
+				rel := release.New(conf, ref.Ref.Metadata.GetName(), "")
+				defaultVal, err := rel.GetDefault()
 				if err == nil {
 					logger.SuccessLog.Info().Msgf(
 						"%s (%s)",
-						yamlData.GetString("metadata.name"),
+						ref.Ref.Metadata.GetName(),
 						defaultVal,
 					)
 				} else {
 					if !installed {
-						logger.StdLog.Info().Msg(yamlData.GetString("metadata.name"))
+						logger.StdLog.Info().Msg(ref.Ref.Metadata.GetName())
 					}
 				}
 			}
-			logger.JumpLine()
+			out.JumpLine()
 		} else {
+			rel := release.New(conf, args[0], "")
+			defaultVal, err := rel.GetDefault()
+			if err != nil {
+				logger.StdLog.Debug().Err(err).Msgf("Unable to get default file")
+			}
 			if installed {
-				logger.JumpLine()
+				out.JumpLine()
 				out.StepTitle(fmt.Sprintf("Installed versions for release \"%s\"", args[0]))
-				logger.JumpLine()
+				out.JumpLine()
 
-				inst := install.NewInstall(args[0])
-				instRelPath := fmt.Sprintf(
-					"%s/%s",
-					installPath,
-					args[0],
-				)
-				logger.StdLog.Debug().Msg(instRelPath)
-				_, err := os.Stat(instRelPath)
+				logger.StdLog.Debug().Msg(rel.InstallDir)
+				_, err := os.Stat(rel.InstallDir)
 				if err != nil {
 					logger.StdLog.Fatal().Msg("Not installed")
 				}
-				if err = filepath.Walk(instRelPath, func(path string, info os.FileInfo, err error) error {
+				if err = filepath.Walk(rel.InstallDir, func(path string, info os.FileInfo, err error) error {
 					if !info.IsDir() && info.Name() != "default" {
 						logger.StdLog.Debug().Msg(path)
 						files = append(files, path)
@@ -122,45 +114,30 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 				}
 
 				for _, file := range files {
-					yamlData.SetConfigFile(file)
-
-					if err := yamlData.ReadInConfig(); err != nil {
-						logger.StdLog.Fatal().Err(err).Msgf("Unable to read file: %s", file)
+					rel.File = file
+					if err := rel.Load(); err != nil {
+						logger.StdLog.Fatal().Err(err).Msg("")
 					}
 
-					if err := yamlData.Unmarshal(inst); err != nil {
-						logger.StdLog.Fatal().Err(err).Msg("Unable to load yaml data")
-					}
-
-					defaultVal, err := inst.GetDefault()
-					if err != nil {
-						logger.StdLog.Fatal().Err(err).Msgf("Unable to get default file")
-					}
-
-					if defaultVal == inst.Spec.Version {
-						logger.SuccessLog.Info().Msg(inst.Spec.Version)
+					if defaultVal == rel.Rel.Spec.GetVersion() {
+						logger.SuccessLog.Info().Msg(rel.Rel.Spec.GetVersion())
 					} else {
-						logger.StdLog.Info().Msg(inst.Spec.Version)
+						logger.StdLog.Info().Msg(rel.Rel.Spec.GetVersion())
 					}
 				}
-				logger.JumpLine()
+				out.JumpLine()
 			} else {
-				inst := install.NewInstall(args[0])
-				rel := release.New(args[0])
 				if !noFormat {
-					logger.JumpLine()
-					out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", rel.Metadata.Name))
-					logger.JumpLine()
+					out.JumpLine()
+					out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", args[0]))
+					out.JumpLine()
 				}
 
-				list = rel.ListVersions(number)
+				ref := reference.New(conf, args[0])
+
+				list = ref.ListVersions(number)
 
 				for i := 0; i < len(list); i++ {
-					defaultVal, err := inst.GetDefault()
-					if err != nil {
-						logger.StdLog.Debug().Err(err).Msgf("Unable to get default file")
-					}
-
 					if !noFormat {
 						if defaultVal == list[i] {
 							logger.SuccessLog.Info().Msg(list[i])
@@ -172,7 +149,7 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 					}
 				}
 				if !noFormat {
-					logger.JumpLine()
+					out.JumpLine()
 				}
 			}
 		}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package ri.release;
+option go_package = "github.com/golgoth31/release-installer/pkg/proto/release;release_proto";
+
+import "proto/common.proto";
+
+message Release {
+  string apiVersion = 1;
+  string kind = 2;
+  ri.common.Metadata metadata = 3;
+  Spec spec = 4;
+}
+
+// Spec ...
+message Spec {
+  string version = 1;
+  string os = 2;
+  string arch = 3;
+  string path = 4;
+  bool default = 5;
+}
