@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/golgoth31/release-installer/configs"
-	"github.com/golgoth31/release-installer/internal/config"
+	internalConfig "github.com/golgoth31/release-installer/internal/config"
+	defaultConfig "github.com/golgoth31/release-installer/internal/default"
+	"github.com/golgoth31/release-installer/internal/migration"
+	"github.com/golgoth31/release-installer/pkg/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/output"
 	"github.com/rs/zerolog"
@@ -17,16 +21,24 @@ import (
 )
 
 var (
-	cfgFile       string
-	out           output.Output
-	installConfig *viper.Viper
+	cfgFile    string
+	out        output.Output
+	conf       *config.Config
+	cmdVersion string
+	cmdForce   bool
+	cmdPath    string
+	rootCmd    = &cobra.Command{ //nolint:exhaustivestruct
+		Use:   "ri [command]",
+		Short: "A tool to download and install binaries",
+		Run:   func(cmd *cobra.Command, args []string) {},
+	}
 )
 
-var rootCmd = &cobra.Command{ //nolint:exhaustivestruct
-	Use:   "ri [command]",
-	Short: "A tool to download and install binaries",
-}
+const (
+	dirPerms os.FileMode = 0750
+)
 
+// Execute executes the root command.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -84,12 +96,43 @@ func initConfig() {
 	} else {
 		logger.StdLog.Debug().Msg("Config file not found, saving default")
 
-		if err := os.Mkdir(homedir, 0750); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+		if err := os.Mkdir(homedir, dirPerms); err != nil {
+			if os.IsNotExist(err) {
+				logger.StdLog.Fatal().Err(err).Msg("")
+			}
 		}
 	}
 
-	config.SetDefault(homedir)
+	conf = internalConfig.Load()
+
+	data, err := ioutil.ReadFile(homedir + "/version")
+	if err != nil {
+		logger.StdLog.Debug().Err(err).Msg("Reading version file")
+	}
+
+	if strings.TrimSpace(string(data)) != configs.Version {
+		if err := migration.Migrate(homedir, strings.TrimSpace(string(data)), conf); err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to migrate")
+		}
+
+		f, err := os.Create(homedir + "/version")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to create version file")
+		}
+
+		defer func() {
+			if ferr := f.Close(); ferr != nil {
+				logger.StdLog.Fatal().Err(ferr).Msg("Failed to close version file")
+			}
+		}()
+
+		_, err = f.WriteString(configs.Version)
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to write version file")
+		}
+	}
+
+	defaultConfig.SetDefault(homedir)
 
 	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")

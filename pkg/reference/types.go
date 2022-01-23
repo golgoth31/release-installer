@@ -1,5 +1,6 @@
 package reference
 
+<<<<<<< HEAD
 // Reference ...
 type Reference struct {
 	APIVersion string `json:"apiVersion"`
@@ -65,4 +66,12 @@ type Arch struct {
 	Amd64 string `json:"amd64,omitempty"`
 	Arm64 string `json:"arm64,omitempty"`
 	Arm   string `json:"arm,omitempty"`
+=======
+import reference_proto "github.com/golgoth31/release-installer/pkg/proto/reference"
+
+// Reference structure.
+type Reference struct {
+	File string
+	Ref  reference_proto.Reference
+>>>>>>> ce9013b (Feat: V2)
 }

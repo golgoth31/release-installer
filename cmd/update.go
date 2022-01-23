@@ -1,54 +1,43 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"runtime"
 	"syscall"
 
 	"github.com/golgoth31/release-installer/configs"
-	"github.com/golgoth31/release-installer/pkg/install"
 	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/reference"
 	"github.com/golgoth31/release-installer/pkg/release"
-	"github.com/hashicorp/go-getter"
+	"github.com/golgoth31/release-installer/pkg/utils"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "update",
 	Short: "Update my binary and the releases definitions",
 	Run: func(cmd *cobra.Command, args []string) {
-		rel := release.New("myself")
-		list := rel.ListVersions(1)
-
-		force, err := cmd.PersistentFlags().GetBool("force")
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
-		}
+		ref := reference.New(conf, "myself")
+		list := ref.ListVersions(1)
 
 		out.Info(fmt.Sprintf("Current ri version: %s", configs.Version))
+		out.JumpLine()
 
-		if configs.Version != list[0] || force {
+		if configs.Version != list[0] || cmdForce {
 			out.StepTitle(fmt.Sprintf("Updating ri binary from %s to %s", configs.Version, list[0]))
 			out.JumpLine()
 
-			path, errFlag := cmd.PersistentFlags().GetString("path")
-			if errFlag != nil {
-				logger.StdLog.Fatal().Err(errFlag).Msg("")
-			}
+			inst := release.New(conf, "myself", list[0])
+			inst.Rel.Spec.Arch = runtime.GOARCH
+			inst.Rel.Spec.Os = runtime.GOOS
+			inst.Rel.Spec.Default = true
+			inst.Rel.Spec.Path = cmdPath
 
-			inst := install.NewInstall("myself")
-			inst.Spec.Arch = runtime.GOARCH
-			inst.Spec.Os = runtime.GOOS
-			inst.Spec.Path = path
-			inst.Spec.Version = list[0]
-			inst.Spec.Default = true
-			inst.Install(force)
+			inst.Install(cmdForce)
 
-			path, err = homedir.Expand(inst.Spec.Path)
+			path, err := homedir.Expand(inst.Rel.Spec.Path)
 			if err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
 			}
@@ -61,34 +50,21 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 		}
 
 		out.JumpLine()
-		out.StepTitle("Updating releases definitions")
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		out.StepTitle("Updating reference definitions")
 
-		releasePath := fmt.Sprintf(
-			"%s/%s",
-			viper.GetString("homedir"),
-			viper.GetString("releases.dir"),
-		)
-
-		// Build the client
-		pwd, err := os.Getwd()
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+		if err := os.RemoveAll(conf.Reference.Path); err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to remove old references")
 		}
 
-		opts := []getter.ClientOption{}
-		client := &getter.Client{ //nolint:exhaustivestruct
-			Ctx: ctx,
-			Src: "https://github.com/golgoth31/release-installer-definitions/" +
+		if err := utils.Download(
+			fmt.Sprintf(
+				"%s/%s",
+				conf.Reference.Repo,
 				"releases/download/latest/ri-releases-definitions.tar.gz",
-			Dst:     releasePath,
-			Pwd:     pwd,
-			Mode:    getter.ClientModeAny,
-			Options: opts,
-		}
-
-		if err = client.Get(); err != nil {
+			),
+			conf.Reference.Path,
+			true,
+		); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
@@ -100,12 +76,13 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 func init() {
 	rootCmd.AddCommand(updateCmd)
 
-	updateCmd.PersistentFlags().StringP(
+	updateCmd.PersistentFlags().StringVarP(
+		&cmdPath,
 		"path",
 		"p",
 		"~/bin",
 		"Destination to install binary in, should be set in your \"$PATH\"",
 	)
 
-	updateCmd.PersistentFlags().BoolP("force", "f", false, "Force update")
+	updateCmd.PersistentFlags().BoolVarP(&cmdForce, "force", "f", false, "Force update")
 }

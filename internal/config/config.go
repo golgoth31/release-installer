@@ -1,15 +1,35 @@
-// Package config ...
+// Package config convert some viper config to internal struct.
 package config
 
 import (
+	"fmt"
+
+	"github.com/golgoth31/release-installer/pkg/config"
 	"github.com/spf13/viper"
 )
 
-// SetDefault ...
-func SetDefault(homedir string) {
-	viper.SetDefault("homedir", homedir)
-	viper.SetDefault("releases.dir", "releases")
-	viper.SetDefault("releases.git", "https://github.com/golgoth31/release-installer-definitions.git")
-	viper.SetDefault("install.dir", "install")
-	viper.SetDefault("binaryPath", "~/bin")
+// Load loads config data from viper.
+func Load() *config.Config {
+	c := config.Config{
+		Release: &config.Release{
+			Path: fmt.Sprintf(
+				"%s/%s",
+				viper.GetString("homedir"),
+				viper.GetString("releases.dir"),
+			),
+			APIVersion: "release/v1",
+			Kind:       "Release",
+		},
+		Reference: &config.Reference{
+			Path: fmt.Sprintf(
+				"%s/%s",
+				viper.GetString("homedir"),
+				viper.GetString("references.dir"),
+			),
+			Repo: viper.GetString("references.repo"),
+		},
+		RepoURL: viper.GetString("repo"),
+	}
+
+	return &c
 }

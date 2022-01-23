@@ -27,32 +27,32 @@ func OkStatus() string {
 
 // DebugStatus ...
 func DebugStatus() string {
-	return fmt.Sprint(aurora.White("\u25CC")) // √
+	return fmt.Sprint(aurora.White("\u25CC")) // ◌
 }
 
 // WarnStatus ...
 func WarnStatus() string {
-	return fmt.Sprint(aurora.Yellow("\u26A0"))
+	return fmt.Sprint(aurora.Yellow("\u26A0")) // ⚠
 }
 
 // ErrorStatus ...
 func ErrorStatus() string {
-	return fmt.Sprint(aurora.Red("\u274C")) // ×
+	return fmt.Sprint(aurora.Red("\u2A2F")) // ⨯
 }
 
 // FatalStatus ...
 func FatalStatus() string {
-	return fmt.Sprint(aurora.Red("\u2620")) // ×
+	return fmt.Sprint(aurora.Red("\u2620")) // ☠
 }
 
 // InfoStatus ...
 func InfoStatus() string {
-	return fmt.Sprint(aurora.Blue("\u00BB")) // ×
+	return fmt.Sprint(aurora.Blue("\u00BB")) // »
 }
 
 // Initialize ...
 func Initialize() {
-	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
 	stdOutput.FormatLevel = func(i interface{}) string {
 		var level string
 
@@ -61,7 +61,7 @@ func Initialize() {
 			level = DebugStatus()
 		case "info":
 			level = InfoStatus()
-		case "warning":
+		case "warn":
 			level = WarnStatus()
 		case "error":
 			level = ErrorStatus()
@@ -76,7 +76,7 @@ func Initialize() {
 	}
 	StdLog = zerolog.New(stdOutput)
 
-	stepOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	stepOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
 	stepOutput.FormatLevel = func(i interface{}) string {
 		return ""
 	}
@@ -85,7 +85,7 @@ func Initialize() {
 	}
 	StepLog = zerolog.New(stepOutput)
 
-	successOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	successOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
 	successOutput.FormatLevel = func(i interface{}) string {
 		return OkStatus()
 	}

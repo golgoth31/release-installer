@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 // Package reference ...
+=======
+// Package reference is used to manipulate references.
+>>>>>>> ce9013b (Feat: V2)
 package reference
 
 import (
 	"context"
 	"fmt"
+<<<<<<< HEAD
 	"os"
 
 	logger "github.com/golgoth31/release-installer/pkg/log"
@@ -41,6 +46,29 @@ func loadYaml(file string) *Reference {
 	}
 
 	return r
+=======
+
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/utils"
+	"github.com/google/go-github/v32/github"
+	"google.golang.org/protobuf/encoding/protojson"
+)
+
+// Load reference data from yaml manifest.
+func (r *Reference) Load() error {
+	jsonData, err := utils.Load(r.File)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	logger.StdLog.Debug().Msgf("Reference json data: %s", jsonData)
+
+	if errUnmarshall := protojson.Unmarshal(jsonData, &r.Ref); errUnmarshall != nil {
+		return fmt.Errorf("%w", errUnmarshall)
+	}
+
+	return nil
+>>>>>>> ce9013b (Feat: V2)
 }
 
 // ListVersions ...
@@ -53,7 +81,11 @@ func (r *Reference) ListVersions(num int) []string {
 	}
 	out := []string{}
 
+<<<<<<< HEAD
 	reference, _, err := client.Repositories.ListReleases(ctx, r.Spec.Repo.Owner, r.Spec.Repo.Name, opts)
+=======
+	reference, _, err := client.Repositories.ListReleases(ctx, r.Ref.Spec.Repo.GetOwner(), r.Ref.Spec.Repo.GetName(), opts)
+>>>>>>> ce9013b (Feat: V2)
 	if err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("Unable to get version list")
 	}
