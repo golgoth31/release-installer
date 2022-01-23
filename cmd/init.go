@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	logger "github.com/golgoth31/release-installer/internal/log"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/hashicorp/go-getter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

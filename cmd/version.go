@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"github.com/golgoth31/release-installer/configs"
-	logger "github.com/golgoth31/release-installer/internal/log"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/spf13/cobra"
 )
 

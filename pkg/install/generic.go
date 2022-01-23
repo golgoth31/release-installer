@@ -1,7 +1,7 @@
 package install
 
 import (
-	"github.com/golgoth31/release-installer/internal/release"
+	"github.com/golgoth31/release-installer/pkg/release"
 )
 
 // NewInstall ...

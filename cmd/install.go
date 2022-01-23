@@ -4,16 +4,10 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/output"
+	"github.com/golgoth31/release-installer/pkg/install"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
-
-var (
-	out           output.Output
-	installConfig *viper.Viper
 )
 
 var installCmd = &cobra.Command{ //nolint:exhaustivestruct
@@ -33,20 +27,20 @@ var installCmd = &cobra.Command{ //nolint:exhaustivestruct
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		logger.JumpLine()
+		out.JumpLine()
 		out.StepTitle(fmt.Sprintf("Installing \"%s\"", rel))
-		logger.JumpLine()
+		out.JumpLine()
 		logger.StdLog.Info().Msg("Requested:")
 		logger.StdLog.Info().Msgf("  Version: %s", inst.Spec.Version)
 		logger.StdLog.Info().Msgf("  OS:      %s", inst.Spec.Os)
 		logger.StdLog.Info().Msgf("  Arch:    %s", inst.Spec.Arch)
 		logger.StdLog.Info().Msgf("  Default: %t", inst.Spec.Default)
 		logger.StdLog.Info().Msgf("  Path:    %s", inst.Spec.Path)
-		logger.JumpLine()
+		out.JumpLine()
 
 		inst.Install(force)
 
-		logger.JumpLine()
+		out.JumpLine()
 		out.Success(
 			"Release installed",
 		)

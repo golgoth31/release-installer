@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/release"
+	"github.com/golgoth31/release-installer/pkg/install"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,14 +53,14 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 
 		if len(args) == 0 {
 			inst := install.Install{} //nolint:exhaustivestruct
-			logger.JumpLine()
+			out.JumpLine()
 			if installed {
 				out.StepTitle("Installed releases")
 			} else {
 				out.StepTitle("Available releases")
 			}
 
-			logger.JumpLine()
+			out.JumpLine()
 
 			if err := filepath.Walk(releasePath, func(path string, info os.FileInfo, err error) error {
 				if !info.IsDir() {
@@ -92,12 +92,12 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 					}
 				}
 			}
-			logger.JumpLine()
+			out.JumpLine()
 		} else {
 			if installed {
-				logger.JumpLine()
+				out.JumpLine()
 				out.StepTitle(fmt.Sprintf("Installed versions for release \"%s\"", args[0]))
-				logger.JumpLine()
+				out.JumpLine()
 
 				inst := install.NewInstall(args[0])
 				instRelPath := fmt.Sprintf(
@@ -143,14 +143,14 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 						logger.StdLog.Info().Msg(inst.Spec.Version)
 					}
 				}
-				logger.JumpLine()
+				out.JumpLine()
 			} else {
 				inst := install.NewInstall(args[0])
 				rel := release.New(args[0])
 				if !noFormat {
-					logger.JumpLine()
+					out.JumpLine()
 					out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", rel.Metadata.Name))
-					logger.JumpLine()
+					out.JumpLine()
 				}
 
 				list = rel.ListVersions(number)
@@ -172,7 +172,7 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 					}
 				}
 				if !noFormat {
-					logger.JumpLine()
+					out.JumpLine()
 				}
 			}
 		}

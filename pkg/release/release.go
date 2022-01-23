@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	logger "github.com/golgoth31/release-installer/internal/log"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/google/go-github/v32/github"
 	"github.com/spf13/viper"
 )

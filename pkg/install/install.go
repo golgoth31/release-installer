@@ -12,10 +12,10 @@ import (
 	"reflect"
 	"strings"
 
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/output"
-	"github.com/golgoth31/release-installer/internal/progressbar"
-	"github.com/golgoth31/release-installer/internal/release"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/output"
+	"github.com/golgoth31/release-installer/pkg/progressbar"
+	"github.com/golgoth31/release-installer/pkg/release"
 	getter "github.com/hashicorp/go-getter"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -273,7 +273,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 		getterDownURL := downURL
 
 		out.StepTitle("Release files")
-		logger.JumpLine()
+		out.JumpLine()
 
 		if releaseData.Spec.Checksum.Check {
 			getterDownURL = fmt.Sprintf(
@@ -291,9 +291,9 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 
 		logger.StdLog.Info().Msgf("Archive file:  %s", downURL)
 
-		logger.JumpLine()
+		out.JumpLine()
 		out.StepTitle("Downloading files")
-		logger.JumpLine()
+		out.JumpLine()
 
 		pwd, osErr := os.Getwd()
 		if osErr != nil {
@@ -327,7 +327,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 			i.removeConfig(err)
 		}
 
-		logger.JumpLine()
+		out.JumpLine()
 		logger.SuccessLog.Info().Msgf("File saved as: %s", file)
 	} else {
 		out.StepTitle("This version is already installed")
@@ -350,7 +350,7 @@ func (i *Install) Install(force bool) { //nolint:go-lint
 	i.SaveConfig()
 
 	if i.Spec.Default {
-		logger.JumpLine()
+		out.JumpLine()
 		logger.StdLog.Info().Msgf("Creating symlink: %s\n", link)
 
 		_, err := os.Stat(link)

@@ -4,7 +4,7 @@ package progressbar
 import (
 	"io"
 
-	logger "github.com/golgoth31/release-installer/internal/log"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 )

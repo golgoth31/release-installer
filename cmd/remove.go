@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
+	"github.com/golgoth31/release-installer/pkg/install"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -15,9 +15,9 @@ var removeCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Run: func(cmd *cobra.Command, args []string) {
 		rel := args[0]
 
-		logger.JumpLine()
+		out.JumpLine()
 		out.StepTitle(fmt.Sprintf("Removing \"%s\"", rel))
-		logger.JumpLine()
+		out.JumpLine()
 
 		ver, err := cmd.PersistentFlags().GetString("version")
 		if err != nil {

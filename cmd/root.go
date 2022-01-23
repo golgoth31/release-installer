@@ -6,14 +6,19 @@ import (
 	"os"
 
 	"github.com/golgoth31/release-installer/internal/config"
-	logger "github.com/golgoth31/release-installer/internal/log"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/output"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile       string
+	out           output.Output
+	installConfig *viper.Viper
+)
 
 var rootCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "ri [command]",

@@ -7,9 +7,9 @@ import (
 	"runtime"
 
 	"github.com/golgoth31/release-installer/configs"
-	"github.com/golgoth31/release-installer/internal/install"
-	logger "github.com/golgoth31/release-installer/internal/log"
-	"github.com/golgoth31/release-installer/internal/release"
+	"github.com/golgoth31/release-installer/pkg/install"
+	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/hashicorp/go-getter"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,7 +29,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 
 		if configs.Version != list[0] || force {
 			out.StepTitle("Updating ri binary")
-			logger.JumpLine()
+			out.JumpLine()
 
 			path, errFlag := cmd.PersistentFlags().GetString("path")
 			if errFlag != nil {
@@ -47,7 +47,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			out.StepTitle("No need to update ri binary")
 		}
 
-		logger.JumpLine()
+		out.JumpLine()
 		out.StepTitle("Updating releases definitions")
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -79,7 +79,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		logger.JumpLine()
+		out.JumpLine()
 		logger.SuccessLog.Info().Msg("Done")
 	},
 }
