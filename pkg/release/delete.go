@@ -22,7 +22,9 @@ func (r *Release) removeConfig(revertError error) {
 func (r *Release) Delete() {
 	var link string
 
-	r.Load()
+	if err := r.Load(); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 
 	binaryFile, revertError := utils.TemplateStringRelease(referenceData.Ref.Spec.File.GetBinary(), &r.Rel)
 	if revertError != nil {

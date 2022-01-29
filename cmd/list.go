@@ -21,7 +21,6 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Short: "List available releases or versions",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// var files []string
 		var files, list []string
 
 		installed, err := cmd.Flags().GetBool("installed")
@@ -44,7 +43,7 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 
 		if len(args) == 0 {
 			// List all available references
-			ref := reference.Reference{}
+			ref := reference.Reference{} //nolint:exhaustivestruct
 
 			out.JumpLine()
 			if installed {

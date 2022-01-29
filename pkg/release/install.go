@@ -15,13 +15,17 @@ import (
 )
 
 var (
-	referenceData *reference.Reference
-	out           output.Output
-	errUnknown    = errors.New("Unknown release mode")
+	referenceData   *reference.Reference
+	out             output.Output
+	errUnknownMode  = errors.New("unknown release mode")
+	errUnknownArch  = errors.New("unknown arch")
+	errUnknownOs    = errors.New("unknown os")
+	errUnknownField = errors.New("unknown field")
 )
 
 const (
-	dirPerms os.FileMode = 0750
+	dirPerms  os.FileMode = 0750
+	filePerms os.FileMode = 0600
 )
 
 // setRealValues extract the arch name as given by the reference into standard one
@@ -39,7 +43,8 @@ func (r *Release) setRealValues(field string) (string, error) {
 			return referenceData.Ref.Spec.Available.Arch.GetI386(), nil
 		default:
 			logger.StdLog.Debug().Msgf("Release install file: %s", r.VersionFile)
-			return "", errors.New("Unknown arch")
+
+			return "", fmt.Errorf("%w", errUnknownArch)
 		}
 	case "Os":
 		switch strings.ToLower(r.Rel.Spec.GetOs()) {
@@ -50,11 +55,11 @@ func (r *Release) setRealValues(field string) (string, error) {
 		case "darwin":
 			return referenceData.Ref.Spec.Available.Os.GetDarwin(), nil
 		default:
-			return "", errors.New("Unknown os")
+			return "", fmt.Errorf("%w", errUnknownOs)
 		}
 	}
 
-	return "", errors.New("Unknown field")
+	return "", fmt.Errorf("%w", errUnknownField)
 }
 
 // IsInstalled checks if a release is installed.
@@ -132,9 +137,7 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 	file := link + "_" + r.Rel.Spec.GetVersion()
 
 	if !r.IsInstalled() || force {
-		var (
-			srcFile string
-		)
+		var srcFile string
 
 		switch referenceData.Ref.Spec.File.GetMode() {
 		case "file":
@@ -142,7 +145,7 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 		case "archive":
 			srcFile = binaryFile
 		default:
-			r.removeConfig(fmt.Errorf("%w", errUnknown))
+			r.removeConfig(fmt.Errorf("%w", errUnknownMode))
 		}
 
 		downURL := fmt.Sprintf(
@@ -175,12 +178,12 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 		out.StepTitle("Downloading files")
 		out.JumpLine()
 
-		if err := utils.Download(
+		if errDownload := utils.Download(
 			getterDownURL,
 			"/tmp",
 			true,
-		); err != nil {
-			r.removeConfig(err)
+		); errDownload != nil {
+			r.removeConfig(errDownload)
 		}
 
 		// Move binary file to requested path

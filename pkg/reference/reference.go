@@ -1,3 +1,4 @@
+// Package reference is used to manipulate references.
 package reference
 
 import (
@@ -10,6 +11,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+// Load reference data from yaml manifest.
 func (r *Reference) Load() error {
 	jsonData, err := utils.Load(r.File)
 	if err != nil {

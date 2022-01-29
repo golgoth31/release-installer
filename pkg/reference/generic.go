@@ -9,8 +9,9 @@ import (
 	reference_proto "github.com/golgoth31/release-installer/pkg/proto/reference"
 )
 
+// New is used to create a reference instance.
 func New(conf *config.Config, name string) *Reference {
-	ref := &Reference{}
+	ref := &Reference{} //nolint:exhaustivestruct
 
 	if name == "myself" {
 		ref.Ref = conf.SetMyself()
@@ -19,8 +20,8 @@ func New(conf *config.Config, name string) *Reference {
 	}
 
 	ref.File = fmt.Sprintf("%s/%s.yaml", conf.Reference.Path, name)
-	ref.Ref = reference_proto.Reference{
-		Metadata: &common_proto.Metadata{
+	ref.Ref = reference_proto.Reference{ //nolint:exhaustivestruct
+		Metadata: &common_proto.Metadata{ //nolint:exhaustivestruct
 			Name: name,
 		},
 	}

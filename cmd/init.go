@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var initCmd = &cobra.Command{
+var initCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "init",
 	Short: "Initialize release-installer",
 	Run: func(cmd *cobra.Command, args []string) {

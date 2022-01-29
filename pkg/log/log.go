@@ -52,7 +52,7 @@ func InfoStatus() string {
 
 // Initialize ...
 func Initialize() {
-	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
 	stdOutput.FormatLevel = func(i interface{}) string {
 		var level string
 
@@ -76,7 +76,7 @@ func Initialize() {
 	}
 	StdLog = zerolog.New(stdOutput)
 
-	stepOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	stepOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
 	stepOutput.FormatLevel = func(i interface{}) string {
 		return ""
 	}
@@ -85,7 +85,7 @@ func Initialize() {
 	}
 	StepLog = zerolog.New(stepOutput)
 
-	successOutput := zerolog.ConsoleWriter{Out: os.Stdout}
+	successOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
 	successOutput.FormatLevel = func(i interface{}) string {
 		return OkStatus()
 	}

@@ -1,5 +1,5 @@
-// Package defaultConfig ...
-package defaultConfig
+// Package defaultconfig ...
+package defaultconfig
 
 import (
 	"github.com/spf13/viper"

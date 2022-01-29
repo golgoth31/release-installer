@@ -9,7 +9,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// SaveConfig saves configuration of installed release
+// SaveConfig saves configuration of installed release.
 func (r *Release) SaveConfig() {
 	if _, err := os.Stat(r.InstallDir); err != nil {
 		if err = os.MkdirAll(r.InstallDir, dirPerms); err != nil {
@@ -46,7 +46,7 @@ func (r *Release) Write() error {
 		return fmt.Errorf("%w", errOut)
 	}
 
-	if err := os.WriteFile(r.VersionFile, out, 0600); err != nil {
+	if err := os.WriteFile(r.VersionFile, out, filePerms); err != nil {
 		return fmt.Errorf("%w", err)
 	}
 

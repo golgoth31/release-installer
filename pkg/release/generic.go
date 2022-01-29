@@ -7,17 +7,18 @@ import (
 	"github.com/golgoth31/release-installer/pkg/reference"
 )
 
+// New is used to create a release instance.
 func New(conf *config.Config, name string, version string) *Release {
 	referenceData = reference.New(conf, name)
 
-	rel := &Release{
+	rel := &Release{ //nolint:exhaustivestruct
 		Rel: release_proto.Release{
 			ApiVersion: conf.Release.APIVersion,
 			Kind:       conf.Release.Kind,
-			Metadata: &common_proto.Metadata{
+			Metadata: &common_proto.Metadata{ //nolint:exhaustivestruct
 				Name: name,
 			},
-			Spec: &release_proto.Spec{
+			Spec: &release_proto.Spec{ //nolint:exhaustivestruct
 				Version: version,
 			},
 		},

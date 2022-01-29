@@ -1,3 +1,4 @@
+// Package config convert some viper config to internal struct.
 package config
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Load loads config data from viper.
 func Load() *config.Config {
 	c := config.Config{
 		Release: &config.Release{

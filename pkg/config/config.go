@@ -1,3 +1,4 @@
+// Package config is used as internal config.
 package config
 
 import (
@@ -7,6 +8,7 @@ import (
 	reference_proto "github.com/golgoth31/release-installer/pkg/proto/reference"
 )
 
+// SetMyself is the default value of ri (mainly for autoupdate).
 func (c *Config) SetMyself() reference_proto.Reference {
 	myself := reference_proto.Reference{
 		ApiVersion: "release/v1",

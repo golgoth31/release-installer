@@ -31,6 +31,7 @@ const (
 	dirPerms os.FileMode = 0750
 )
 
+// Execute executes the root command.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		logger.StdLog.Err(err).Msg("")

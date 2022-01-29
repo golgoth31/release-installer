@@ -45,6 +45,7 @@ func (r *Release) GetDefault() (string, error) {
 	return string(data), nil
 }
 
+// Load release data from yaml manifest.
 func (r *Release) Load() error {
 	jsonData, err := utils.Load(r.VersionFile)
 	if err != nil {
