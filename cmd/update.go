@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"syscall"
 
 	"github.com/golgoth31/release-installer/configs"
 	"github.com/golgoth31/release-installer/pkg/install"
@@ -43,6 +44,10 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			inst.Spec.Version = list[0]
 			inst.Spec.Default = true
 			inst.Install(force)
+
+			if err := syscall.Exec(fmt.Sprintf("%s/ri", path), os.Args, os.Environ()); err != nil {
+				logger.StdLog.Fatal().Err(err).Msg("")
+			}
 		} else {
 			out.StepTitle("No need to update ri binary")
 		}
