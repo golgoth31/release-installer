@@ -12,6 +12,7 @@ import (
 	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/hashicorp/go-getter"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -47,8 +48,13 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			inst.Spec.Default = true
 			inst.Install(force)
 
-			if err := syscall.Exec(fmt.Sprintf("%s/ri_%s", path, list[0]), os.Args, os.Environ()); err != nil {
+			path, err = homedir.Expand(inst.Spec.Path)
+			if err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
+			}
+
+			if err := syscall.Exec(fmt.Sprintf("%s/ri_%s", path, list[0]), os.Args, os.Environ()); err != nil {
+				logger.StdLog.Fatal().Err(err).Msgf("%s", fmt.Sprintf("%s/ri_%s", path, list[0]))
 			}
 		} else {
 			out.StepTitle("No need to update ri binary")
