@@ -37,7 +37,7 @@ var initCmd = &cobra.Command{ //nolint:exhaustivestruct
 				"releases/download/latest/ri-releases-definitions.tar.gz",
 			),
 			conf.Reference.Path,
-			false,
+			true,
 		); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}

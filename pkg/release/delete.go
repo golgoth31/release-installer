@@ -19,16 +19,20 @@ func (r *Release) removeConfig(revertError error) {
 }
 
 // Delete ...
-func (r *Release) Delete() {
+func (r *Release) Delete(purge bool) error {
 	var link string
 
 	if err := r.Load(); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		return err
 	}
 
-	binaryFile, revertError := utils.TemplateStringRelease(referenceData.Ref.Spec.File.GetBinary(), &r.Rel)
-	if revertError != nil {
-		r.removeConfig(revertError)
+	if !purge && r.IsDefault() {
+		return ErrIsDefault
+	}
+
+	binaryFile, err := utils.TemplateStringRelease(referenceData.Ref.Spec.File.GetBinary(), &r.Rel)
+	if err != nil {
+		return err
 	}
 
 	if referenceData.Ref.Spec.File.GetLink() == "" {
@@ -40,14 +44,30 @@ func (r *Release) Delete() {
 	file := link + "_" + r.Rel.Spec.GetVersion()
 
 	if err := os.Remove(file); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		return err
 	}
 
-	logger.SuccessLog.Info().Msgf("Remove binary file: %s", file)
+	logger.StdLog.Debug().Msgf("Remove binary file: %s", file)
 
 	if err := os.Remove(r.VersionFile); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+		return err
 	}
 
-	logger.SuccessLog.Info().Msgf("Remove yaml manifest: %s", r.VersionFile)
+	logger.StdLog.Debug().Msgf("Remove yaml manifest: %s", r.VersionFile)
+
+	if purge {
+		if err := os.Remove(link); err != nil {
+			return err
+		}
+
+		logger.StdLog.Debug().Msgf("Remove default link: %s", link)
+
+		if err := os.Remove(r.DefaultFile); err != nil {
+			return err
+		}
+
+		logger.StdLog.Debug().Msgf("Remove default file: %s", r.DefaultFile)
+	}
+
+	return nil
 }

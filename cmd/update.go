@@ -21,12 +21,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 		ref := reference.New(conf, "myself")
 		list := ref.ListVersions(1)
 
-		force, err := cmd.PersistentFlags().GetBool("force")
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
-		}
-
-		if configs.Version != list[0] || force {
+		if configs.Version != list[0] || cmdForce {
 			out.StepTitle("Updating ri binary")
 			out.JumpLine()
 
@@ -34,13 +29,9 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			inst.Rel.Spec.Arch = runtime.GOARCH
 			inst.Rel.Spec.Os = runtime.GOOS
 			inst.Rel.Spec.Default = true
+			inst.Rel.Spec.Path = cmdPath
 
-			inst.Rel.Spec.Path, err = cmd.PersistentFlags().GetString("path")
-			if err != nil {
-				logger.StdLog.Fatal().Err(err).Msg("")
-			}
-
-			inst.Install(force)
+			inst.Install(cmdForce)
 
 			if err := syscall.Exec(inst.Rel.Spec.GetBinary(), os.Args, os.Environ()); err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
@@ -58,7 +49,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 				"releases/download/latest/ri-releases-definitions.tar.gz",
 			),
 			conf.Reference.Path,
-			false,
+			true,
 		); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
@@ -71,12 +62,13 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 func init() {
 	rootCmd.AddCommand(updateCmd)
 
-	updateCmd.PersistentFlags().StringP(
+	updateCmd.PersistentFlags().StringVarP(
+		&cmdPath,
 		"path",
 		"p",
 		"~/bin",
 		"Destination to install binary in, should be set in your \"$PATH\"",
 	)
 
-	updateCmd.PersistentFlags().BoolP("force", "f", false, "Force update")
+	updateCmd.PersistentFlags().BoolVarP(&cmdForce, "force", "f", false, "Force update")
 }

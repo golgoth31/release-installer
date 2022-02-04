@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/golgoth31/release-installer/pkg/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
@@ -47,6 +48,17 @@ func (r *Release) GetDefault() (string, error) {
 	return string(data), nil
 }
 
+// IsDefault checks if current release is the default installed.
+func (r *Release) IsDefault() bool {
+	def, _ := r.GetDefault()
+
+	if def != r.Rel.Spec.GetVersion() {
+		return false
+	}
+
+	return true
+}
+
 // Load release data from yaml manifest.
 func (r *Release) Load() error {
 	jsonData, err := utils.Load(r.VersionFile)
@@ -62,16 +74,17 @@ func (r *Release) Load() error {
 }
 
 func (r *Release) List() ([]string, error) {
-	var files []string
+	var verions []string
 
-	_, err := os.Stat(r.InstallDir)
-	if err != nil {
+	if _, err := os.Stat(r.InstallDir); err != nil {
 		return []string{}, fmt.Errorf("release not installed")
 	}
+
 	if err := filepath.Walk(r.InstallDir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() && info.Name() != "default" {
-			logger.StdLog.Debug().Msg(path)
-			files = append(files, path)
+			version := strings.Split(info.Name(), ".yaml")
+			logger.StdLog.Debug().Msg(version[0])
+			verions = append(verions, version[0])
 		}
 
 		return nil
@@ -79,5 +92,5 @@ func (r *Release) List() ([]string, error) {
 		return []string{}, err
 	}
 
-	return files, nil
+	return verions, nil
 }

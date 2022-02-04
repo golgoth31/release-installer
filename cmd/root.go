@@ -17,10 +17,13 @@ import (
 )
 
 var (
-	cfgFile string
-	out     output.Output
-	conf    *config.Config
-	rootCmd = &cobra.Command{ //nolint:exhaustivestruct
+	cfgFile    string
+	out        output.Output
+	conf       *config.Config
+	cmdVersion string
+	cmdForce   bool
+	cmdPath    string
+	rootCmd    = &cobra.Command{ //nolint:exhaustivestruct
 		Use:   "ri [command]",
 		Short: "A tool to download and install binaries",
 		Run:   func(cmd *cobra.Command, args []string) {},
@@ -49,9 +52,9 @@ func init() {
 		"config file (default is $HOME/.release-installer/release-installer.yaml)")
 	rootCmd.PersistentFlags().Bool("debug", false, "debug")
 
-	if err := viper.BindPFlag("cfgFile", rootCmd.PersistentFlags().Lookup("config")); err != nil {
-		log.Fatal().Err(err).Msg("")
-	}
+	// if err := viper.BindPFlag("cfgFile", rootCmd.PersistentFlags().Lookup("config")); err != nil {
+	// 	log.Fatal().Err(err).Msg("")
+	// }
 }
 
 // initConfig reads in config file and ENV variables if set.
