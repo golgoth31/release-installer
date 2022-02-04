@@ -3,8 +3,10 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
+	"github.com/golgoth31/release-installer/configs"
 	"github.com/golgoth31/release-installer/internal/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/output"
@@ -26,6 +28,29 @@ var rootCmd = &cobra.Command{ //nolint:exhaustivestruct
 }
 
 func Execute() {
+	data, err := ioutil.ReadFile("$HOME/.release-installer/version")
+	if err != nil {
+		logger.StdLog.Debug().Err(err).Msg("Reading version file")
+	}
+
+	if string(data) != configs.Version {
+		f, err := os.Create("$HOME/.release-installer/version")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to create version file")
+		}
+
+		defer func() {
+			if ferr := f.Close(); ferr != nil {
+				logger.StdLog.Fatal().Err(ferr).Msg("Failed to close version file")
+			}
+		}()
+
+		_, err = f.WriteString(configs.Version)
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to write version file")
+		}
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		logger.StdLog.Err(err).Msg("")
 		os.Exit(1)

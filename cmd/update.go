@@ -28,8 +28,10 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
+		out.Info(fmt.Sprintf("Current ri version: %s", configs.Version))
+
 		if configs.Version != list[0] || force {
-			out.StepTitle("Updating ri binary")
+			out.StepTitle(fmt.Sprintf("Updating ri binary from %s to %s", configs.Version, list[0]))
 			out.JumpLine()
 
 			path, errFlag := cmd.PersistentFlags().GetString("path")
