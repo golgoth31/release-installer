@@ -47,7 +47,7 @@ func (c *Config) SetMyself() reference_proto.Reference {
 					Amd64: "amd64",
 					Arm64: "arm64",
 					Arm:   "armv7",
-					I386:  "i386",
+					I386:  "386",
 				},
 			},
 		},

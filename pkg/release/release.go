@@ -3,6 +3,8 @@ package release
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"github.com/golgoth31/release-installer/pkg/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
@@ -57,4 +59,25 @@ func (r *Release) Load() error {
 	}
 
 	return nil
+}
+
+func (r *Release) List() ([]string, error) {
+	var files []string
+
+	_, err := os.Stat(r.InstallDir)
+	if err != nil {
+		return []string{}, fmt.Errorf("release not installed")
+	}
+	if err := filepath.Walk(r.InstallDir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() && info.Name() != "default" {
+			logger.StdLog.Debug().Msg(path)
+			files = append(files, path)
+		}
+
+		return nil
+	}); err != nil {
+		return []string{}, err
+	}
+
+	return files, nil
 }

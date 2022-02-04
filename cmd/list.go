@@ -97,18 +97,8 @@ var listCmd = &cobra.Command{ //nolint:exhaustivestruct
 				out.JumpLine()
 
 				logger.StdLog.Debug().Msg(rel.InstallDir)
-				_, err := os.Stat(rel.InstallDir)
+				files, err = rel.List()
 				if err != nil {
-					logger.StdLog.Fatal().Msg("Not installed")
-				}
-				if err = filepath.Walk(rel.InstallDir, func(path string, info os.FileInfo, err error) error {
-					if !info.IsDir() && info.Name() != "default" {
-						logger.StdLog.Debug().Msg(path)
-						files = append(files, path)
-					}
-
-					return nil
-				}); err != nil {
 					logger.StdLog.Fatal().Err(err).Msg("")
 				}
 

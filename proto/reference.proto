@@ -60,7 +60,7 @@ message Os {
 
 // Arch ...
 message Arch {
-  string 386 = 1;
+  string i386 = 1;
   string amd64 = 2;
   string arm64 = 3;
   string arm = 4;

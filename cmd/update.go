@@ -2,10 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"runtime"
+	"syscall"
 
 	"github.com/golgoth31/release-installer/configs"
 	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/reference"
+	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/golgoth31/release-installer/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -26,18 +30,21 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			out.StepTitle("Updating ri binary")
 			out.JumpLine()
 
-			// path, errFlag := cmd.PersistentFlags().GetString("path")
-			// if errFlag != nil {
-			// 	logger.StdLog.Fatal().Err(errFlag).Msg("")
-			// }
+			inst := release.New(conf, "myself", list[0])
+			inst.Rel.Spec.Arch = runtime.GOARCH
+			inst.Rel.Spec.Os = runtime.GOOS
+			inst.Rel.Spec.Default = true
 
-			// inst := release.NewInstall("myself")
-			// inst.Spec.Arch = runtime.GOARCH
-			// inst.Spec.Os = runtime.GOOS
-			// inst.Spec.Path = path
-			// inst.Spec.Version = list[0]
-			// inst.Spec.Default = true
-			// inst.Install(force)
+			inst.Rel.Spec.Path, err = cmd.PersistentFlags().GetString("path")
+			if err != nil {
+				logger.StdLog.Fatal().Err(err).Msg("")
+			}
+
+			inst.Install(force)
+
+			if err := syscall.Exec(inst.Rel.Spec.GetBinary(), os.Args, os.Environ()); err != nil {
+				logger.StdLog.Fatal().Err(err).Msg("")
+			}
 		} else {
 			out.StepTitle("No need to update ri binary")
 		}

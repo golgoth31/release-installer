@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var removeCmd = &cobra.Command{ //nolint:exhaustivestruct
-	Use:   "remove",
+var cleanCmd = &cobra.Command{ //nolint:exhaustivestruct
+	Use:   "clean",
 	Short: "Remove a specific release version",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,11 +43,13 @@ var removeCmd = &cobra.Command{ //nolint:exhaustivestruct
 }
 
 func init() {
-	rootCmd.AddCommand(removeCmd)
+	rootCmd.AddCommand(cleanCmd)
 
-	removeCmd.PersistentFlags().StringP("version", "v", "", "Release version")
+	cleanCmd.PersistentFlags().StringP("version", "v", "", "Release version to clean (only this one)")
 
-	if err := removeCmd.MarkPersistentFlagRequired("version"); err != nil {
+	if err := cleanCmd.MarkPersistentFlagRequired("version"); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
+
+	cleanCmd.PersistentFlags().BoolP("purge", "p", false, "Purge all the binries of the release (default one included)")
 }

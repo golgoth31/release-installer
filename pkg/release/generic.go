@@ -20,6 +20,7 @@ func New(conf *config.Config, name string, version string) *Release {
 			},
 			Spec: &release_proto.Spec{ //nolint:exhaustivestruct
 				Version: version,
+				Binary:  referenceData.Ref.Spec.File.GetBinary(),
 			},
 		},
 	}

@@ -18,5 +18,6 @@ message Spec {
   string os = 2;
   string arch = 3;
   string path = 4;
-  bool default = 5;
+  string binary = 5;
+  bool default = 6;
 }
