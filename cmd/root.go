@@ -52,7 +52,6 @@ func Execute() {
 	}
 
 	if err := rootCmd.Execute(); err != nil {
-		logger.StdLog.Err(err).Msg("")
 		os.Exit(1)
 	}
 }

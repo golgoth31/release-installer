@@ -47,7 +47,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 			inst.Spec.Default = true
 			inst.Install(force)
 
-			if err := syscall.Exec(fmt.Sprintf("%s/ri", path), os.Args, os.Environ()); err != nil {
+			if err := syscall.Exec(fmt.Sprintf("%s/ri_%s", path, list[0]), os.Args, os.Environ()); err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
 			}
 		} else {
