@@ -95,13 +95,13 @@ func initConfig() {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
-	data, err := ioutil.ReadFile("$HOME/.release-installer/version")
+	data, err := ioutil.ReadFile(homedir + "/version")
 	if err != nil {
 		logger.StdLog.Debug().Err(err).Msg("Reading version file")
 	}
 
 	if string(data) != configs.Version {
-		f, err := os.Create("$HOME/.release-installer/version")
+		f, err := os.Create(homedir + "/version")
 		if err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("Unable to create version file")
 		}
