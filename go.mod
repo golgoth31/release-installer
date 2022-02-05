@@ -3,6 +3,7 @@ module github.com/golgoth31/release-installer
 go 1.16
 
 require (
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/google/go-github/v32 v32.1.0
 	github.com/hashicorp/go-getter v1.5.10

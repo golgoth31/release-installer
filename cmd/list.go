@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/reference"
@@ -24,7 +22,7 @@ var (
 		Short: "List available releases or versions",
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			var files, list []string
+			var list []string
 
 			if len(args) == 0 {
 				// List all available references
@@ -39,13 +37,8 @@ var (
 
 				out.JumpLine()
 
-				if err := filepath.Walk(conf.Reference.Path, func(path string, info os.FileInfo, err error) error {
-					if !info.IsDir() {
-						files = append(files, path)
-					}
-
-					return nil
-				}); err != nil {
+				files, err := reference.List(conf)
+				if err != nil {
 					logger.StdLog.Fatal().Err(err).Msg("")
 				}
 

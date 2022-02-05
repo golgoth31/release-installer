@@ -2,6 +2,8 @@ package reference
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/golgoth31/release-installer/pkg/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
@@ -31,4 +33,20 @@ func New(conf *config.Config, name string) *Reference {
 	}
 
 	return ref
+}
+
+func List(conf *config.Config) ([]string, error) {
+	var files []string
+
+	if err := filepath.Walk(conf.Reference.Path, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+
+		return nil
+	}); err != nil {
+		return []string{}, err
+	}
+
+	return files, nil
 }

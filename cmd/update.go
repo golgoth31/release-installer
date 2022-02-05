@@ -11,6 +11,7 @@ import (
 	"github.com/golgoth31/release-installer/pkg/reference"
 	"github.com/golgoth31/release-installer/pkg/release"
 	"github.com/golgoth31/release-installer/pkg/utils"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
 
@@ -21,8 +22,11 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 		ref := reference.New(conf, "myself")
 		list := ref.ListVersions(1)
 
+		out.Info(fmt.Sprintf("Current ri version: %s", configs.Version))
+		out.JumpLine()
+
 		if configs.Version != list[0] || cmdForce {
-			out.StepTitle("Updating ri binary")
+			out.StepTitle(fmt.Sprintf("Updating ri binary from %s to %s", configs.Version, list[0]))
 			out.JumpLine()
 
 			inst := release.New(conf, "myself", list[0])
@@ -33,15 +37,20 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 
 			inst.Install(cmdForce)
 
-			if err := syscall.Exec(inst.Rel.Spec.GetBinary(), os.Args, os.Environ()); err != nil {
+			path, err := homedir.Expand(inst.Rel.Spec.Path)
+			if err != nil {
 				logger.StdLog.Fatal().Err(err).Msg("")
+			}
+
+			if err := syscall.Exec(fmt.Sprintf("%s/ri_%s", path, list[0]), os.Args, os.Environ()); err != nil {
+				logger.StdLog.Fatal().Err(err).Msgf("%s", fmt.Sprintf("%s/ri_%s", path, list[0]))
 			}
 		} else {
 			out.StepTitle("No need to update ri binary")
 		}
 
 		out.JumpLine()
-		out.StepTitle("Updating releases definitions")
+		out.StepTitle("Updating reference definitions")
 		if err := utils.Download(
 			fmt.Sprintf(
 				"%s/%s",

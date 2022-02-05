@@ -3,10 +3,13 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
+	"github.com/golgoth31/release-installer/configs"
 	internalConfig "github.com/golgoth31/release-installer/internal/config"
 	defaultConfig "github.com/golgoth31/release-installer/internal/default"
+	"github.com/golgoth31/release-installer/internal/migration"
 	"github.com/golgoth31/release-installer/pkg/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/output"
@@ -109,4 +112,32 @@ func initConfig() {
 	}
 
 	conf = internalConfig.Load()
+
+	data, err := ioutil.ReadFile(homedir + "/version")
+	if err != nil {
+		logger.StdLog.Debug().Err(err).Msg("Reading version file")
+	}
+
+	if string(data) != configs.Version {
+		if err := migration.Migrate(homedir, string(data), conf); err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to migrate")
+		}
+
+		f, err := os.Create(homedir + "/version")
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to create version file")
+		}
+
+		defer func() {
+			if ferr := f.Close(); ferr != nil {
+				logger.StdLog.Fatal().Err(ferr).Msg("Failed to close version file")
+			}
+		}()
+
+		_, err = f.WriteString(configs.Version)
+		if err != nil {
+			logger.StdLog.Fatal().Err(err).Msg("Unable to write version file")
+		}
+	}
+
 }
