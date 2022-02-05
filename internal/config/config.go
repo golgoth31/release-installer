@@ -27,7 +27,7 @@ func Load() *config.Config {
 				viper.GetString("references.dir"),
 			),
 		},
-		RepoURL: viper.GetString("references.repo"),
+		RepoURL: viper.GetString("repo"),
 	}
 
 	return &c
