@@ -4,43 +4,27 @@ package reference
 import (
 	"context"
 	"fmt"
-	"os"
 
 	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/utils"
 	"github.com/google/go-github/v32/github"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// New ...
-func New(rel string) *Reference {
-	return loadYaml(rel)
-}
-
-func loadYaml(file string) *Reference {
-	referencePath := fmt.Sprintf(
-		"%s/%s",
-		viper.GetString("homedir"),
-		viper.GetString("releases.dir"),
-	)
-
-	if file == "myself" {
-		return myself
-	}
-
-	r := &Reference{} // nolint: exhaustivestruct
-
-	data, err := os.ReadFile(fmt.Sprintf("%s/%s.yaml", referencePath, file))
+// Load reference data from yaml manifest.
+func (r *Reference) Load() error {
+	jsonData, err := utils.Load(r.File)
 	if err != nil {
-		logger.StdLog.Debug().Err(err).Msg("Unable to read release definition")
-		logger.StdLog.Fatal().Msg("Unknown release")
+		return fmt.Errorf("%w", err)
 	}
 
-	if err := yaml.Unmarshal(data, r); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
+	logger.StdLog.Debug().Msgf("Reference json data: %s", jsonData)
+
+	if errUnmarshall := protojson.Unmarshal(jsonData, &r.Ref); errUnmarshall != nil {
+		return fmt.Errorf("%w", errUnmarshall)
 	}
 
-	return r
+	return nil
 }
 
 // ListVersions ...
@@ -53,7 +37,7 @@ func (r *Reference) ListVersions(num int) []string {
 	}
 	out := []string{}
 
-	reference, _, err := client.Repositories.ListReleases(ctx, r.Spec.Repo.Owner, r.Spec.Repo.Name, opts)
+	reference, _, err := client.Repositories.ListReleases(ctx, r.Ref.Spec.Repo.GetOwner(), r.Ref.Spec.Repo.GetName(), opts)
 	if err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("Unable to get version list")
 	}

@@ -1,4 +1,4 @@
-package install
+package installv1
 
 // Install ...
 type Install struct {

@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package ri.reference;
+option go_package = "github.com/golgoth31/release-installer/pkg/proto/reference;reference_proto";
+
+import "proto/common.proto";
+
+message Reference {
+  string apiVersion = 1;
+  string kind = 2;
+  ri.common.Metadata metadata = 3;
+  Spec spec = 4;
+}
+
+// Spec ...
+message Spec {
+  Repo repo = 1;
+  File file = 2;
+  Checksum checksum = 3;
+  Available available = 4;
+}
+
+// File ...
+message File {
+  string url = 1;
+  string src = 2;
+  string binary = 3;
+  string mode = 4;
+  string binaryPath = 5;
+  string link = 6;
+}
+
+// Checksum ...
+message Checksum {
+  bool check = 1;
+  string url = 2;
+  string file = 3;
+  string format = 4;
+}
+
+// Repo ...
+message Repo {
+  string type = 1;
+  string name = 2;
+  string owner = 3;
+}
+
+// Available ...
+message Available {
+  Os os = 1;
+  Arch arch = 2;
+}
+
+// OS ...
+message Os {
+  string linux = 1;
+  string windows = 2;
+  string darwin = 3;
+}
+
+// Arch ...
+message Arch {
+  string i386 = 1;
+  string amd64 = 2;
+  string arm64 = 3;
+  string arm = 4;
+}
