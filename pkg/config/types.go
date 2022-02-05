@@ -17,4 +17,5 @@ type Release struct {
 // Reference is the reference config.
 type Reference struct {
 	Path string
+	Repo string
 }

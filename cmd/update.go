@@ -59,7 +59,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 		if err := utils.Download(
 			fmt.Sprintf(
 				"%s/%s",
-				conf.RepoURL,
+				conf.Reference.Repo,
 				"releases/download/latest/ri-releases-definitions.tar.gz",
 			),
 			conf.Reference.Path,
