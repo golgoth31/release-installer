@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/golgoth31/release-installer/configs"
 	internalConfig "github.com/golgoth31/release-installer/internal/config"
@@ -114,8 +115,8 @@ func initConfig() {
 		logger.StdLog.Debug().Err(err).Msg("Reading version file")
 	}
 
-	if string(data) != configs.Version {
-		if err := migration.Migrate(homedir, string(data), conf); err != nil {
+	if strings.TrimSpace(string(data)) != configs.Version {
+		if err := migration.Migrate(homedir, strings.TrimSpace(string(data)), conf); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("Unable to migrate")
 		}
 

@@ -17,9 +17,11 @@ import (
 var out output.Output
 
 func Migrate(homedir string, version string, conf *config.Config) error {
-	sem, err := semver.StrictNewVersion(version)
+	sem, err := semver.NewVersion(version)
 	if err != nil {
 		logger.StdLog.Error().Err(err).Msg("Unable to migrate")
+
+		return err
 	}
 
 	switch sem.Major() {
