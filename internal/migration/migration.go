@@ -8,6 +8,7 @@ import (
 	"github.com/Masterminds/semver/v3"
 	installv1 "github.com/golgoth31/release-installer/internal/migration/install/v1"
 	"github.com/golgoth31/release-installer/pkg/config"
+	logger "github.com/golgoth31/release-installer/pkg/log"
 	"github.com/golgoth31/release-installer/pkg/output"
 	"github.com/golgoth31/release-installer/pkg/release"
 	"sigs.k8s.io/yaml"
@@ -16,7 +17,10 @@ import (
 var out output.Output
 
 func Migrate(homedir string, version string, conf *config.Config) error {
-	sem := semver.MustParse(version)
+	sem, err := semver.StrictNewVersion(version)
+	if err != nil {
+		logger.StdLog.Error().Err(err).Msg("Unable to migrate")
+	}
 
 	switch sem.Major() {
 	case 1:
@@ -58,7 +62,7 @@ func Migrate(homedir string, version string, conf *config.Config) error {
 			for _, v := range relFiles {
 				inst := installv1.Install{}
 				data, _ := os.ReadFile(v)
-				fmt.Printf("%s\n", v)
+				logger.StdLog.Debug().Msg(v)
 				yaml.Unmarshal(data, &inst)
 				rel := release.New(conf, inst.Metadata.Release, inst.Spec.Version)
 				rel.Rel.Spec.Arch = inst.Spec.Arch

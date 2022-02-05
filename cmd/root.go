@@ -101,14 +101,10 @@ func initConfig() {
 		logger.StdLog.Debug().Msg("Config file not found, saving default")
 
 		if err := os.Mkdir(homedir, dirPerms); err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+			if os.IsNotExist(err) {
+				logger.StdLog.Fatal().Err(err).Msg("")
+			}
 		}
-	}
-
-	defaultConfig.SetDefault(homedir)
-
-	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
 	}
 
 	conf = internalConfig.Load()
@@ -140,4 +136,9 @@ func initConfig() {
 		}
 	}
 
+	defaultConfig.SetDefault(homedir)
+
+	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
+		logger.StdLog.Fatal().Err(err).Msg("")
+	}
 }
