@@ -9,6 +9,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// Load loads yaml file and convert it to json
 func Load(file string) ([]byte, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {

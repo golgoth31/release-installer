@@ -137,27 +137,4 @@ func initConfig() {
 	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")
 	}
-
-	data, err := ioutil.ReadFile(homedir + "/version")
-	if err != nil {
-		logger.StdLog.Debug().Err(err).Msg("Reading version file")
-	}
-
-	if string(data) != configs.Version {
-		f, err := os.Create(homedir + "/version")
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("Unable to create version file")
-		}
-
-		defer func() {
-			if ferr := f.Close(); ferr != nil {
-				logger.StdLog.Fatal().Err(ferr).Msg("Failed to close version file")
-			}
-		}()
-
-		_, err = f.WriteString(configs.Version)
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("Unable to write version file")
-		}
-	}
 }

@@ -1,110 +1,96 @@
-// Package release ...
 package release
 
 import (
-	"context"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 
+	"github.com/golgoth31/release-installer/pkg/config"
 	logger "github.com/golgoth31/release-installer/pkg/log"
-	"github.com/google/go-github/v32/github"
-	"github.com/spf13/viper"
+	"github.com/golgoth31/release-installer/pkg/utils"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
-var yamlData *viper.Viper
-
-// New ...
-func New(rel string) *Release {
-	yamlData = viper.New()
-
-	return loadYaml(rel)
-}
-
-func loadYaml(file string) *Release {
-	releasePath := fmt.Sprintf(
+// Paths returns various path.
+func (r *Release) paths(conf *config.Config) {
+	r.InstallDir = fmt.Sprintf(
 		"%s/%s",
-		viper.GetString("homedir"),
-		viper.GetString("releases.dir"),
+		conf.Release.Path,
+		r.Rel.Metadata.GetName(),
 	)
 
-	myself := &Release{
-		APIVersion: "release/v1",
-		Kind:       "Release",
-		Metadata: Metadata{
-			Name: "release-installer",
-			Web:  "https://github.com/golgoth31/release-installer",
-		},
-		Spec: Spec{
-			Repo: Repo{
-				Type:  "github",
-				Name:  "release-installer",
-				Owner: "golgoth31",
-			},
-			File: File{
-				URL:        "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
-				Src:        "ri_{{ .Version }}_{{ .Os }}_{{ .Arch }}",
-				BinaryPath: ".",
-				Binary:     "ri",
-				Mode:       "file",
-			},
-			Checksum: Checksum{
-				Check:  true,
-				URL:    "https://github.com/golgoth31/release-installer/releases/download/{{ .Version }}",
-				File:   "ri_{{ .Version }}_SHA256SUMS.txt",
-				Format: "sha256",
-			},
-			Available: Available{
-				Os: Os{
-					Linux:  "linux",
-					Darwin: "darwin",
-				},
-				Arch: Arch{
-					Amd64: "amd64",
-					Arm64: "arm64",
-					Arm:   "armv7",
-				},
-			},
-		},
-	}
+	r.VersionFile = fmt.Sprintf(
+		"%s/%s.yaml",
+		r.InstallDir,
+		r.Rel.Spec.GetVersion(),
+	)
 
-	if file == "myself" {
-		return myself
-	}
-
-	yamlData.SetConfigType("yaml")
-	yamlData.SetConfigFile(fmt.Sprintf("%s/%s.yaml", releasePath, file))
-
-	if err := yamlData.ReadInConfig(); err != nil {
-		logger.StdLog.Debug().Err(err).Msg("Unable to read release definition")
-		logger.StdLog.Fatal().Msg("Unknown release")
-	}
-
-	r := &Release{}
-
-	if err := yamlData.Unmarshal(r); err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("")
-	}
-
-	return r
+	r.DefaultFile = fmt.Sprintf(
+		"%s/%s",
+		r.InstallDir,
+		"default",
+	)
 }
 
-// ListVersions ...
-func (r *Release) ListVersions(num int) []string {
-	ctx := context.Background()
-	client := github.NewClient(nil)
-	opts := &github.ListOptions{
-		Page:    1,
-		PerPage: num,
-	}
-	out := []string{}
-
-	release, _, err := client.Repositories.ListReleases(ctx, r.Spec.Repo.Owner, r.Spec.Repo.Name, opts)
+// GetDefault gets default version installed.
+func (r *Release) GetDefault() (string, error) {
+	data, err := ioutil.ReadFile(r.DefaultFile)
 	if err != nil {
-		logger.StdLog.Fatal().Err(err).Msg("Unable to get version list")
+		logger.StdLog.Debug().Err(err).Msg("Reading default file")
+
+		return "", fmt.Errorf("%w", err)
 	}
 
-	for _, val := range release {
-		out = append(out, val.GetTagName())
+	logger.StdLog.Debug().Msgf("default data: %s", data)
+
+	return string(data), nil
+}
+
+// IsDefault checks if current release is the default installed.
+func (r *Release) IsDefault() bool {
+	def, _ := r.GetDefault()
+
+	if def != r.Rel.Spec.GetVersion() {
+		return false
 	}
 
-	return out
+	return true
+}
+
+// Load release data from yaml manifest.
+func (r *Release) Load() error {
+	jsonData, err := utils.Load(r.VersionFile)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	if errUnmarshall := protojson.Unmarshal(jsonData, &r.Rel); errUnmarshall != nil {
+		return fmt.Errorf("%w", errUnmarshall)
+	}
+
+	return nil
+}
+
+func (r *Release) List() ([]string, error) {
+	var verions []string
+
+	if _, err := os.Stat(r.InstallDir); err != nil {
+		return []string{}, fmt.Errorf("release not installed")
+	}
+
+	if err := filepath.Walk(r.InstallDir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() && info.Name() != "default" {
+			version := strings.Split(info.Name(), ".yaml")
+			logger.StdLog.Debug().Msg(version[0])
+			verions = append(verions, version[0])
+		}
+
+		return nil
+	}); err != nil {
+		return []string{}, err
+	}
+
+	return verions, nil
 }
