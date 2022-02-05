@@ -55,10 +55,6 @@ func init() {
 		"",
 		"config file (default is $HOME/.release-installer/release-installer.yaml)")
 	rootCmd.PersistentFlags().Bool("debug", false, "debug")
-
-	// if err := viper.BindPFlag("cfgFile", rootCmd.PersistentFlags().Lookup("config")); err != nil {
-	// 	log.Fatal().Err(err).Msg("")
-	// }
 }
 
 // initConfig reads in config file and ENV variables if set.

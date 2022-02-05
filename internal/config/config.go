@@ -27,10 +27,7 @@ func Load() *config.Config {
 				viper.GetString("references.dir"),
 			),
 		},
-		RepoURL: fmt.Sprintf(
-			"https://%s",
-			viper.GetString("references.repo"),
-		),
+		RepoURL: viper.GetString("references.repo"),
 	}
 
 	return &c

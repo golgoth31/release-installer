@@ -51,6 +51,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 
 		out.JumpLine()
 		out.StepTitle("Updating reference definitions")
+		fmt.Println(conf.RepoURL)
 		if err := utils.Download(
 			fmt.Sprintf(
 				"%s/%s",
