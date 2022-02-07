@@ -28,14 +28,11 @@ var (
 				// List all available references
 				ref := reference.Reference{} //nolint:exhaustivestruct
 
-				out.JumpLine()
 				if cmdInstalled {
-					out.StepTitle("Installed releases")
+					out.StepTitle("Installed releases", 1)
 				} else {
-					out.StepTitle("Available releases")
+					out.StepTitle("Available releases", 1)
 				}
-
-				out.JumpLine()
 
 				files, err := reference.List(conf)
 				if err != nil {
@@ -51,14 +48,16 @@ var (
 					rel := release.New(conf, ref.Ref.Metadata.GetName(), "")
 					defaultVal, err := rel.GetDefault()
 					if err == nil {
-						logger.SuccessLog.Info().Msgf(
-							"%s (%s)",
-							ref.Ref.Metadata.GetName(),
-							defaultVal,
+						out.Success(
+							fmt.Sprintf(
+								"%s (%s)",
+								ref.Ref.Metadata.GetName(),
+								defaultVal,
+							),
 						)
 					} else {
 						if !cmdInstalled {
-							logger.StdLog.Info().Msg(ref.Ref.Metadata.GetName())
+							out.Info(ref.Ref.Metadata.GetName())
 						}
 					}
 				}
@@ -70,9 +69,13 @@ var (
 					logger.StdLog.Debug().Err(err).Msgf("Unable to get default file")
 				}
 				if cmdInstalled {
-					out.JumpLine()
-					out.StepTitle(fmt.Sprintf("Installed versions for release \"%s\"", args[0]))
-					out.JumpLine()
+					out.StepTitle(
+						fmt.Sprintf(
+							"Installed versions for release \"%s\"",
+							args[0],
+						),
+						1,
+					)
 
 					logger.StdLog.Debug().Msg(rel.InstallDir)
 					versions, err := rel.List()
@@ -87,17 +90,15 @@ var (
 						}
 
 						if curRel.IsDefault() {
-							logger.SuccessLog.Info().Msg(curRel.Rel.Spec.GetVersion())
+							out.Success(curRel.Rel.Spec.GetVersion())
 						} else {
-							logger.StdLog.Info().Msg(curRel.Rel.Spec.GetVersion())
+							out.Info(curRel.Rel.Spec.GetVersion())
 						}
 					}
 					out.JumpLine()
 				} else {
 					if !cmdNoFormat {
-						out.JumpLine()
-						out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", args[0]))
-						out.JumpLine()
+						out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", args[0]), 1)
 					}
 
 					ref := reference.New(conf, args[0])
@@ -107,12 +108,12 @@ var (
 					for i := 0; i < len(list); i++ {
 						if !cmdNoFormat {
 							if defaultVal == list[i] {
-								logger.SuccessLog.Info().Msg(list[i])
+								out.Success(list[i])
 							} else {
-								logger.StdLog.Info().Msg(list[i])
+								out.Info(list[i])
 							}
 						} else {
-							logger.StepLog.Info().Msg(list[i])
+							out.NoFormat(list[i])
 						}
 					}
 					if !cmdNoFormat {

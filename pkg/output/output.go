@@ -2,36 +2,62 @@
 package output
 
 import (
-	logger "github.com/golgoth31/release-installer/pkg/log"
-	"github.com/logrusorgru/aurora/v3"
+	"github.com/pterm/pterm"
 )
 
 // StepTitle ...
-func (o *Output) StepTitle(str string) {
-	logger.StepLog.Info().Msgf(" %v", aurora.Bold(str).Underline())
+func (o *Output) StepTitle(str string, level int) {
+	pterm.DefaultSection.WithLevel(level).Println(str)
 }
 
 // SuccessTitle ...
 func (o *Output) SuccessTitle(str string) {
-	logger.SuccessLog.Info().Msgf("%v", aurora.Bold(str).Underline())
+	pterm.DefaultSection.WithStyle(&pterm.ThemeDefault.SuccessMessageStyle).Print(str)
 }
 
 // JumpLine ...
 func (o *Output) JumpLine() {
-	logger.StepLog.Info().Msg("")
+	pterm.DefaultBasicText.Print("\n")
 }
 
 // NoFormat ...
 func (o *Output) NoFormat(str string) {
-	logger.StepLog.Info().Msg(str)
+	pterm.DefaultBasicText.Printf("%s\n", str)
 }
 
 // Info ...
 func (o *Output) Info(str string) {
-	logger.StdLog.Info().Msg(str)
+	pref := pterm.Prefix{
+		Text:  "\u00BB",
+		Style: &pterm.ThemeDefault.InfoPrefixStyle,
+	}
+	pterm.Info.WithPrefix(pref).Println(str)
 }
 
 // Success ...
 func (o *Output) Success(str string) {
-	logger.SuccessLog.Info().Msgf(str)
+	pref := pterm.Prefix{
+		Text:  "\u221A",
+		Style: &pterm.ThemeDefault.SuccessPrefixStyle,
+	}
+	pterm.Success.WithPrefix(pref).Println(str)
+}
+
+// SuccessString ...
+func (o *Output) SuccessString(str string) string {
+	pref := pterm.Prefix{
+		Text:  "\u221A",
+		Style: &pterm.ThemeDefault.SuccessPrefixStyle,
+	}
+
+	return pterm.Success.WithPrefix(pref).Sprint(str)
+}
+
+// Warn ...
+func (o *Output) Warn(str string) {
+	pref := pterm.Prefix{
+		Text:  "\u26A0",
+		Style: &pterm.ThemeDefault.WarningPrefixStyle,
+	}
+	pterm.Warning.WithPrefix(pref).Println(str)
 }

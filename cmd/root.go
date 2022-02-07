@@ -36,6 +36,8 @@ var (
 
 const (
 	dirPerms os.FileMode = 0750
+	level1   int         = 1
+	level2   int         = 2
 )
 
 // Execute executes the root command.
@@ -103,6 +105,8 @@ func initConfig() {
 		}
 	}
 
+	defaultConfig.SetDefault(homedir)
+
 	conf = internalConfig.Load()
 
 	data, err := ioutil.ReadFile(homedir + "/version")
@@ -131,8 +135,6 @@ func initConfig() {
 			logger.StdLog.Fatal().Err(err).Msg("Unable to write version file")
 		}
 	}
-
-	defaultConfig.SetDefault(homedir)
 
 	if err := viper.WriteConfigAs(homedir + "/release-installer.yaml"); err != nil {
 		logger.StdLog.Fatal().Err(err).Msg("")

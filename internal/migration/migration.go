@@ -17,16 +17,20 @@ import (
 var out output.Output
 
 func Migrate(homedir string, version string, conf *config.Config) error {
+	if version == "" {
+		return nil
+	}
+
 	sem, err := semver.NewVersion(version)
 	if err != nil {
-		logger.StdLog.Error().Err(err).Msg("Unable to migrate")
+		logger.StdLog.Debug().Err(err).Msg("Unable to migrate")
 
 		return err
 	}
 
 	switch sem.Major() {
 	case 1:
-		out.StepTitle(fmt.Sprintf("Migration from %s", version))
+		out.StepTitle(fmt.Sprintf("Migration from %s", version), 1)
 
 		if err := os.Rename(homedir+"/releases", homedir+"/references"); err != nil {
 			return err

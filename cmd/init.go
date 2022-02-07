@@ -14,10 +14,8 @@ var initCmd = &cobra.Command{ //nolint:exhaustivestruct
 	Use:   "init",
 	Short: "Initialize release-installer",
 	Run: func(cmd *cobra.Command, args []string) {
-		out.StepTitle("Initializing release-installer")
-
-		out.JumpLine()
-		out.StepTitle("Create Directory")
+		out.StepTitle("Initializing release-installer", level1)
+		out.StepTitle("Create Directory", level2)
 
 		if _, err := os.Stat(conf.Release.Path); err != nil {
 			if err = os.Mkdir(conf.Release.Path, dirPerms); err != nil {
@@ -26,13 +24,11 @@ var initCmd = &cobra.Command{ //nolint:exhaustivestruct
 		}
 
 		out.Success("Done")
-		out.JumpLine()
-		out.StepTitle("Downloading references")
+		out.StepTitle("Downloading references", level2)
 
 		if err := utils.Download(
 			fmt.Sprintf(
-				"%s%s/%s",
-				"https://",
+				"%s/%s",
 				viper.GetString("references.repo"),
 				"releases/download/latest/ri-releases-definitions.tar.gz",
 			),
@@ -42,7 +38,6 @@ var initCmd = &cobra.Command{ //nolint:exhaustivestruct
 			logger.StdLog.Fatal().Err(err).Msg("")
 		}
 
-		out.Success("Done")
 		out.JumpLine()
 	},
 }

@@ -85,39 +85,7 @@ publish:
 clean:
 	rm -rf ri
 
-PROTOC_IMAGE := protoc
+PROTOC_IMAGE := rvolosatovs/protoc:3.3.0
 
-#-----------------------------------------------------------------------------
-# BUILD
-#-----------------------------------------------------------------------------
-
-.PHONY: all
-all:
-	docker build -t protoc .
-	docker run --rm -v $$(pwd):$$(pwd) -w $$(pwd) $(PROTOC_IMAGE) \
-		nanopb_generator \
-		-D src \
-		domopool.proto
-
-	docker run --rm -v $$(pwd):$$(pwd) -w $$(pwd) $(PROTOC_IMAGE) \
-		protoc \
-		-I/usr/include \
-		-I. \
-		--go_out=$(GOPATH)/src \
-		--js_out=import_style=commonjs,binary:js \
-		--rust_out=rust/src \
-		domopool.proto
-
-	# docker run --rm -v $$(pwd):$$(pwd) -w $$(pwd) $(PROTOC_IMAGE) \
-	# 	protoc \
-	# 	-I/usr/include \
-	# 	-I. \
-	# 	--rust_out=. \
-	# 	domopool.proto
-
-	# docker run --rm -v $$(pwd):$$(pwd) -w $$(pwd) $(PROTOC_IMAGE) \
-	# 	protoc-wrapper \
-	# 	-I/usr/include \
-	# 	-I. \
-	# 	--js_out=import_style=commonjs,binary:js \
-	# 	domopool.proto /usr/include/github.com/gogo/protobuf/gogoproto/gogo.proto
+build_proto:
+	docker run --rm -v $$(pwd):$$(pwd) -w $$(pwd) $(PROTOC_IMAGE) -I. --go_out=${GOPATH}/src proto/*

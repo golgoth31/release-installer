@@ -155,8 +155,7 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 		)
 		getterDownURL := downURL
 
-		out.StepTitle("Release files")
-		out.JumpLine()
+		out.StepTitle("Release files", 2)
 
 		if referenceData.Ref.Spec.Checksum.GetCheck() {
 			getterDownURL = fmt.Sprintf(
@@ -166,17 +165,18 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 				checksumFileName,
 			)
 
-			logger.StdLog.Info().Msgf("Checksum file: %s/%s",
-				checksumURL,
-				checksumFileName,
+			out.Info(
+				fmt.Sprintf(
+					"Checksum file: %s/%s",
+					checksumURL,
+					checksumFileName,
+				),
 			)
 		}
 
-		logger.StdLog.Info().Msgf("Archive file:  %s", downURL)
+		out.Info(fmt.Sprintf("Archive file:  %s", downURL))
 
-		out.JumpLine()
-		out.StepTitle("Downloading files")
-		out.JumpLine()
+		out.StepTitle("Downloading files", 2)
 
 		if errDownload := utils.Download(
 			getterDownURL,
@@ -196,9 +196,14 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 		}
 
 		out.JumpLine()
-		logger.SuccessLog.Info().Msgf("File saved as: %s", file)
+		out.Info(
+			fmt.Sprintf(
+				"File saved as: %s",
+				file,
+			),
+		)
 	} else {
-		out.StepTitle("This version is already installed")
+		out.Success("This version is already installed")
 	}
 
 	_, err = r.GetDefault()
@@ -220,7 +225,12 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 
 	if r.Rel.Spec.GetDefault() {
 		out.JumpLine()
-		logger.StdLog.Info().Msgf("Creating symlink: %s\n", link)
+		out.Info(
+			fmt.Sprintf(
+				"Creating symlink: %s\n",
+				link,
+			),
+		)
 
 		_, err := os.Stat(link)
 		if err == nil {
@@ -237,6 +247,6 @@ func (r *Release) Install(force bool) { //nolint:go-lint
 
 		r.saveDefault()
 
-		logger.SuccessLog.Info().Msgf("Done")
+		out.Success("Done")
 	}
 }

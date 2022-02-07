@@ -4,12 +4,14 @@ package progressbar
 import (
 	"io"
 
-	logger "github.com/golgoth31/release-installer/pkg/log"
+	"github.com/golgoth31/release-installer/pkg/output"
 	"github.com/vbauerster/mpb/v5"
 	"github.com/vbauerster/mpb/v5/decor"
 )
 
 const pbWidth = 200
+
+var out *output.Output
 
 // TrackProgress generates a progress bar.
 func (cpb *ProgressBar) TrackProgress(
@@ -22,11 +24,11 @@ func (cpb *ProgressBar) TrackProgress(
 	defer cpb.lock.Unlock()
 
 	pb := mpb.New(mpb.WithWidth(pbWidth))
-	// Parameters of th new progress bar
+	// Parameters of the new progress bar
 	bar := pb.AddBar(totalSize,
 		mpb.PrependDecorators(
 			decor.OnComplete(
-				decor.Name(logger.InfoStatus()), logger.OkStatus(),
+				decor.Name(""), out.SuccessString(""),
 			),
 		),
 		mpb.AppendDecorators(
