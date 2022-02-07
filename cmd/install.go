@@ -25,13 +25,12 @@ var (
 			inst.Rel.Spec.Default = cmdDefault
 
 			out.StepTitle(fmt.Sprintf("Installing \"%s\"", args[0]), 1)
-			logger.StdLog.Info().Msg("Requested:")
-			logger.StdLog.Info().Msgf("  Version: %s", inst.Rel.Spec.GetVersion())
-			logger.StdLog.Info().Msgf("  OS:      %s", inst.Rel.Spec.GetOs())
-			logger.StdLog.Info().Msgf("  Arch:    %s", inst.Rel.Spec.GetArch())
-			logger.StdLog.Info().Msgf("  Default: %t", inst.Rel.Spec.GetDefault())
-			logger.StdLog.Info().Msgf("  Path:    %s", inst.Rel.Spec.GetPath())
-			out.JumpLine()
+			out.Info("Requested:")
+			out.Info(fmt.Sprintf("  Version: %s", inst.Rel.Spec.GetVersion()))
+			out.Info(fmt.Sprintf("  OS:      %s", inst.Rel.Spec.GetOs()))
+			out.Info(fmt.Sprintf("  Arch:    %s", inst.Rel.Spec.GetArch()))
+			out.Info(fmt.Sprintf("  Default: %t", inst.Rel.Spec.GetDefault()))
+			out.Info(fmt.Sprintf("  Path:    %s", inst.Rel.Spec.GetPath()))
 
 			inst.Install(cmdForce)
 

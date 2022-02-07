@@ -26,7 +26,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 		out.Info(fmt.Sprintf("Current ri version: %s", configs.Version))
 
 		if configs.Version != list[0] || cmdForce {
-			out.StepTitle(fmt.Sprintf("Updating ri binary from %s to %s", configs.Version, list[0]), 1)
+			out.StepTitle(fmt.Sprintf("Updating ri binary from %s to %s", configs.Version, list[0]), level1)
 
 			inst := release.New(conf, "myself", list[0])
 			inst.Rel.Spec.Arch = runtime.GOARCH
@@ -45,11 +45,10 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 				logger.StdLog.Fatal().Err(err).Msgf("%s", fmt.Sprintf("%s/ri_%s", path, list[0]))
 			}
 		} else {
-			out.StepTitle("No need to update ri binary", 1)
+			out.StepTitle("No need to update ri binary", level1)
 		}
 
-		out.JumpLine()
-		out.StepTitle("Updating reference definitions", 1)
+		out.StepTitle("Updating reference definitions", level1)
 
 		if err := os.RemoveAll(conf.Reference.Path); err != nil {
 			logger.StdLog.Fatal().Err(err).Msg("Unable to remove old references")
@@ -68,7 +67,7 @@ var updateCmd = &cobra.Command{ //nolint:exhaustivestruct
 		}
 
 		out.JumpLine()
-		logger.SuccessLog.Info().Msg("Done")
+		out.Success("Done")
 	},
 }
 
