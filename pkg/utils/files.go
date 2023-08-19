@@ -19,7 +19,7 @@ func Load(file string) ([]byte, error) {
 	return yaml.YAMLToJSONStrict(data)
 }
 
-func MoveFile(src string, dst string, dirPerms os.FileMode) error {
+func MoveFile(src, dst string, dirPerms os.FileMode) error {
 	in, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("%w", err)

@@ -27,7 +27,7 @@ func (r *Reference) Load() error {
 	return nil
 }
 
-// ListVersions ...
+// ListVersions string list.
 func (r *Reference) ListVersions(num int) []string {
 	ctx := context.Background()
 	client := github.NewClient(nil)

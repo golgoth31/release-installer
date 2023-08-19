@@ -16,7 +16,7 @@ import (
 
 var out output.Output
 
-func Migrate(homedir string, version string, conf *config.Config) error {
+func Migrate(homedir, version string, conf *config.Config) error {
 	if version == "" {
 		return nil
 	}
@@ -69,13 +69,20 @@ func Migrate(homedir string, version string, conf *config.Config) error {
 				inst := installv1.Install{}
 				data, _ := os.ReadFile(v)
 				logger.StdLog.Debug().Msg(v)
-				yaml.Unmarshal(data, &inst)
+
+				if err := yaml.Unmarshal(data, &inst); err != nil {
+					return err
+				}
+
 				rel := release.New(conf, inst.Metadata.Release, inst.Spec.Version)
 				rel.Rel.Spec.Arch = inst.Spec.Arch
 				rel.Rel.Spec.Os = inst.Spec.Os
 				rel.Rel.Spec.Path = inst.Spec.Path
 				rel.Rel.Spec.Default = inst.Spec.Default
-				rel.Write()
+
+				if err := rel.Write(); err != nil {
+					return err
+				}
 			}
 		}
 	}

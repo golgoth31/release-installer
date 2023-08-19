@@ -5,27 +5,27 @@ import (
 	"github.com/pterm/pterm"
 )
 
-// StepTitle ...
+// StepTitle string.
 func (o *Output) StepTitle(str string, level int) {
 	pterm.DefaultSection.WithLevel(level).Println(str)
 }
 
-// SuccessTitle ...
+// SuccessTitle string.
 func (o *Output) SuccessTitle(str string) {
 	pterm.DefaultSection.WithStyle(&pterm.ThemeDefault.SuccessMessageStyle).Print(str)
 }
 
-// JumpLine ...
+// JumpLine string.
 func (o *Output) JumpLine() {
 	pterm.DefaultBasicText.Print("\n")
 }
 
-// NoFormat ...
+// NoFormat string.
 func (o *Output) NoFormat(str string) {
 	pterm.DefaultBasicText.Printf("%s\n", str)
 }
 
-// Info ...
+// Info string.
 func (o *Output) Info(str string) {
 	pref := pterm.Prefix{
 		Text:  "\u00BB",
@@ -34,7 +34,7 @@ func (o *Output) Info(str string) {
 	pterm.Info.WithPrefix(pref).Println(str)
 }
 
-// Success ...
+// Success string.
 func (o *Output) Success(str string) {
 	pref := pterm.Prefix{
 		Text:  "\u221A",
@@ -43,7 +43,7 @@ func (o *Output) Success(str string) {
 	pterm.Success.WithPrefix(pref).Println(str)
 }
 
-// SuccessString ...
+// SuccessString string.
 func (o *Output) SuccessString(str string) string {
 	pref := pterm.Prefix{
 		Text:  "\u221A",
@@ -53,7 +53,7 @@ func (o *Output) SuccessString(str string) string {
 	return pterm.Success.WithPrefix(pref).Sprint(str)
 }
 
-// Warn ...
+// Warn string.
 func (o *Output) Warn(str string) {
 	pref := pterm.Prefix{
 		Text:  "\u26A0",

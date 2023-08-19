@@ -1,4 +1,4 @@
 package output
 
-// Output ...
+// Output struct
 type Output struct{}

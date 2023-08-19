@@ -10,7 +10,7 @@ import (
 
 var defaultProgressBar getter.ProgressTracker = &progressbar.ProgressBar{}
 
-func Download(src string, dst string, progress bool) error {
+func Download(src, dst string, progress bool) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

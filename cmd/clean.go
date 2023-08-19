@@ -18,7 +18,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			inst := release.New(conf, args[0], cmdVersion)
 			if cmdVersion == "" {
-				out.StepTitle(fmt.Sprintf("Cleaning \"%s\"", args[0]), level1)
+				out.StepTitle(fmt.Sprintf("Cleaning %q", args[0]), level1)
 
 				versions, _ := inst.List()
 				for _, version := range versions {
@@ -52,7 +52,7 @@ var (
 			} else if inst.IsInstalled() {
 				out.StepTitle(
 					fmt.Sprintf(
-						"Cleaning version \"%s\" from release \"%s\"",
+						"Cleaning version %q from release %q",
 						cmdVersion,
 						args[0],
 					),

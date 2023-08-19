@@ -24,7 +24,7 @@ var (
 			inst.Rel.Spec.Path = cmdPath
 			inst.Rel.Spec.Default = cmdDefault
 
-			out.StepTitle(fmt.Sprintf("Installing \"%s\"", args[0]), 1)
+			out.StepTitle(fmt.Sprintf("Installing %q", args[0]), 1)
 			out.Info("Requested:")
 			out.Info(fmt.Sprintf("  Version: %s", inst.Rel.Spec.GetVersion()))
 			out.Info(fmt.Sprintf("  OS:      %s", inst.Rel.Spec.GetOs()))

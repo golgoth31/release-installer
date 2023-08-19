@@ -8,7 +8,7 @@ import (
 )
 
 // New is used to create a release instance.
-func New(conf *config.Config, name string, version string) *Release {
+func New(conf *config.Config, name, version string) *Release {
 	referenceData = reference.New(conf, name)
 
 	rel := &Release{ //nolint:exhaustivestruct

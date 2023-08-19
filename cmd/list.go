@@ -98,7 +98,7 @@ var (
 				if cmdInstalled {
 					out.StepTitle(
 						fmt.Sprintf(
-							"Installed versions for release \"%s\"",
+							"Installed versions for release %q",
 							args[0],
 						),
 						1,
@@ -125,7 +125,7 @@ var (
 					out.JumpLine()
 				} else {
 					if !cmdNoFormat {
-						out.StepTitle(fmt.Sprintf("Available versions for release \"%s\"", args[0]), 1)
+						out.StepTitle(fmt.Sprintf("Available versions for release %q", args[0]), 1)
 					}
 
 					ref := reference.New(conf, args[0])

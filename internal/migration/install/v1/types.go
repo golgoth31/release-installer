@@ -1,6 +1,6 @@
 package installv1
 
-// Install ...
+// Install struct.
 type Install struct {
 	APIVersion string   `json:"apiVersion"`
 	Kind       string   `json:"kind"`
@@ -8,12 +8,12 @@ type Install struct {
 	Spec       Spec     `json:"spec"`
 }
 
-// Metadata ...
+// Metadata struct.
 type Metadata struct {
 	Release string `json:"release"`
 }
 
-// Spec ...
+// Spec struct.
 type Spec struct {
 	Version string `json:"version"`
 	Os      string `json:"os"`

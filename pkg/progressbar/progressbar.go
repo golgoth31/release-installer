@@ -53,5 +53,5 @@ func (cpb *ProgressBar) TrackProgress(
 	}
 }
 
-// Close ...
+// Close progressbar.
 func (c *readCloser) Close() error { return c.close() }

@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// SetDefault ...
+// SetDefault config values.
 func SetDefault(homedir string) {
 	viper.SetDefault("homedir", homedir)
 	viper.SetDefault("references.dir", "references")

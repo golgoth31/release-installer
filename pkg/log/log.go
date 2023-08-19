@@ -2,7 +2,6 @@
 package log
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/logrusorgru/aurora/v3"
@@ -10,50 +9,50 @@ import (
 )
 
 var (
-	// StdLog ...
+	// StdLog logger.
 	StdLog zerolog.Logger
 
-	// StepLog ...
+	// StepLog logger.
 	StepLog zerolog.Logger
 
-	// SuccessLog ...
+	// SuccessLog logger.
 	SuccessLog zerolog.Logger
 )
 
-// OkStatus ...
+// OkStatus string.
 func OkStatus() string {
-	return fmt.Sprint(aurora.Green("\u221A")) // √
+	return aurora.Green("\u221A").String() // √
 }
 
-// DebugStatus ...
+// DebugStatus string.
 func DebugStatus() string {
-	return fmt.Sprint(aurora.White("\u25CC")) // ◌
+	return aurora.White("\u25CC").String() // ◌
 }
 
-// WarnStatus ...
+// WarnStatus string.
 func WarnStatus() string {
-	return fmt.Sprint(aurora.Yellow("\u26A0")) // ⚠
+	return aurora.Yellow("\u26A0").String() // ⚠
 }
 
-// ErrorStatus ...
+// ErrorStatus string.
 func ErrorStatus() string {
-	return fmt.Sprint(aurora.Red("\u2A2F")) // ⨯
+	return aurora.Red("\u2A2F").String() // ⨯
 }
 
-// FatalStatus ...
+// FatalStatus string.
 func FatalStatus() string {
-	return fmt.Sprint(aurora.Red("\u2620")) // ☠
+	return aurora.Red("\u2620").String() // ☠
 }
 
-// InfoStatus ...
+// InfoStatus string.
 func InfoStatus() string {
-	return fmt.Sprint(aurora.Blue("\u00BB")) // »
+	return aurora.Blue("\u00BB").String() // »
 }
 
-// Initialize ...
+// Initialize logger.
 func Initialize() {
 	stdOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
-	stdOutput.FormatLevel = func(i interface{}) string {
+	stdOutput.FormatLevel = func(i any) string {
 		var level string
 
 		switch i {
@@ -71,25 +70,25 @@ func Initialize() {
 
 		return level
 	}
-	stdOutput.FormatTimestamp = func(i interface{}) string {
+	stdOutput.FormatTimestamp = func(i any) string {
 		return ""
 	}
 	StdLog = zerolog.New(stdOutput)
 
 	stepOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
-	stepOutput.FormatLevel = func(i interface{}) string {
+	stepOutput.FormatLevel = func(i any) string {
 		return ""
 	}
-	stepOutput.FormatTimestamp = func(i interface{}) string {
+	stepOutput.FormatTimestamp = func(i any) string {
 		return ""
 	}
 	StepLog = zerolog.New(stepOutput)
 
 	successOutput := zerolog.ConsoleWriter{Out: os.Stdout} //nolint:exhaustivestruct
-	successOutput.FormatLevel = func(i interface{}) string {
+	successOutput.FormatLevel = func(i any) string {
 		return OkStatus()
 	}
-	successOutput.FormatTimestamp = func(i interface{}) string {
+	successOutput.FormatTimestamp = func(i any) string {
 		return ""
 	}
 	SuccessLog = zerolog.New(successOutput)

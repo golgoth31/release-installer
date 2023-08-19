@@ -2,7 +2,6 @@ package release
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,7 +35,7 @@ func (r *Release) paths(conf *config.Config) {
 
 // GetDefault gets default version installed.
 func (r *Release) GetDefault() (string, error) {
-	data, err := ioutil.ReadFile(r.DefaultFile)
+	data, err := os.ReadFile(r.DefaultFile)
 	if err != nil {
 		logger.StdLog.Debug().Err(err).Msg("Reading default file")
 
@@ -52,11 +51,7 @@ func (r *Release) GetDefault() (string, error) {
 func (r *Release) IsDefault() bool {
 	def, _ := r.GetDefault()
 
-	if def != r.Rel.Spec.GetVersion() {
-		return false
-	}
-
-	return true
+	return def == r.Rel.Spec.GetVersion()
 }
 
 // Load release data from yaml manifest.

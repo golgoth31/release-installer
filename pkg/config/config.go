@@ -10,7 +10,7 @@ import (
 
 // SetMyself is the default value of ri (mainly for autoupdate).
 func (c *Config) SetMyself() reference_proto.Reference {
-	myself := reference_proto.Reference{
+	return reference_proto.Reference{
 		ApiVersion: "release/v1",
 		Kind:       "Release",
 		Metadata: &common_proto.Metadata{
@@ -52,6 +52,4 @@ func (c *Config) SetMyself() reference_proto.Reference {
 			},
 		},
 	}
-
-	return myself
 }

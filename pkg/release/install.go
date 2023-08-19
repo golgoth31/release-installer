@@ -74,7 +74,7 @@ func (r *Release) IsInstalled() bool {
 }
 
 // Install ...
-func (r *Release) Install(force bool) { //nolint:go-lint
+func (r *Release) Install(force bool) {
 	var (
 		err  error
 		link string

@@ -19,7 +19,7 @@ func (r *Release) removeConfig(revertError error) {
 	}
 }
 
-// Delete ...
+// Delete release.
 func (r *Release) Delete(purge bool) error {
 	var link string
 

@@ -3,7 +3,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -81,9 +80,9 @@ func initConfig() {
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
-		home, err := os.UserHomeDir()
-		if err != nil {
-			logger.StdLog.Fatal().Err(err).Msg("")
+		home, errHomeDir := os.UserHomeDir()
+		if errHomeDir != nil {
+			logger.StdLog.Fatal().Err(errHomeDir).Msg("")
 		}
 		homedir = fmt.Sprintf("%s/.release-installer", home)
 		// Search config in home directory with name ".release-installer" (without extension).
@@ -93,14 +92,14 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	if err := viper.ReadInConfig(); err == nil {
+	if errViperRead := viper.ReadInConfig(); errViperRead == nil {
 		logger.StdLog.Debug().Msgf("Reading config file: %s", viper.ConfigFileUsed())
 	} else {
 		logger.StdLog.Debug().Msg("Config file not found, saving default")
 
-		if err := os.Mkdir(homedir, dirPerms); err != nil {
-			if os.IsNotExist(err) {
-				logger.StdLog.Fatal().Err(err).Msg("")
+		if errMkdir := os.Mkdir(homedir, dirPerms); errMkdir != nil {
+			if os.IsNotExist(errMkdir) {
+				logger.StdLog.Fatal().Err(errMkdir).Msg("")
 			}
 		}
 	}
@@ -109,7 +108,7 @@ func initConfig() {
 
 	conf = internalConfig.Load()
 
-	data, err := ioutil.ReadFile(homedir + "/version")
+	data, err := os.ReadFile(homedir + "/version")
 	if err != nil {
 		logger.StdLog.Debug().Err(err).Msg("Reading version file")
 	}
