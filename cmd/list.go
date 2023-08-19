@@ -39,6 +39,13 @@ var (
 					logger.StdLog.Fatal().Err(err).Msg("")
 				}
 
+				// Build list of available references with default version if installed
+				type output struct {
+					value       string
+					isInstalled bool
+				}
+				var outList []output
+
 				for _, file := range files {
 					logger.StdLog.Debug().Msgf("Reading file: %s", file)
 					ref.File = file
@@ -47,22 +54,42 @@ var (
 					}
 					rel := release.New(conf, ref.Ref.Metadata.GetName(), "")
 					defaultVal, err := rel.GetDefault()
+
+					// list = ref.ListVersions(1)
 					if err == nil {
-						out.Success(
-							fmt.Sprintf(
-								"%s (%s)",
-								ref.Ref.Metadata.GetName(),
-								defaultVal,
-							),
+						outList = append(
+							outList,
+							output{
+								value: fmt.Sprintf(
+									"%s (%s)",
+									ref.Ref.Metadata.GetName(),
+									defaultVal,
+								),
+								isInstalled: true,
+							},
 						)
 					} else {
+						outList = append(outList, output{
+							value:       ref.Ref.Metadata.GetName(),
+							isInstalled: false,
+						})
+					}
+				}
+
+				// Print list
+				for _, singleOut := range outList {
+					if singleOut.isInstalled {
+						out.Success(singleOut.value)
+					} else {
 						if !cmdInstalled {
-							out.Info(ref.Ref.Metadata.GetName())
+							out.Info(singleOut.value)
 						}
 					}
 				}
+
 				out.JumpLine()
 			} else {
+				// Check one release version
 				rel := release.New(conf, args[0], "")
 				defaultVal, err := rel.GetDefault()
 				if err != nil {
