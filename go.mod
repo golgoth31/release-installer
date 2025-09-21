@@ -14,7 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pterm/pterm v0.12.65
 	github.com/rs/zerolog v1.30.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.16.0
 	github.com/vbauerster/mpb/v5 v5.4.0
 	google.golang.org/protobuf v1.31.0
@@ -73,7 +73,7 @@ require (
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
