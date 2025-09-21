@@ -1,6 +1,6 @@
 module github.com/golgoth31/release-installer
 
-go 1.20
+go 1.22
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
@@ -18,7 +18,7 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/vbauerster/mpb/v5 v5.4.0
 	google.golang.org/protobuf v1.31.0
-	sigs.k8s.io/yaml v1.3.0
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
@@ -78,6 +78,7 @@ require (
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.opencensus.io v0.24.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
