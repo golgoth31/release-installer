@@ -1,9 +1,9 @@
 module github.com/golgoth31/release-installer
 
-go 1.20
+go 1.21
 
 require (
-	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/google/go-github/v32 v32.1.0
 	github.com/hashicorp/go-getter v1.7.2
