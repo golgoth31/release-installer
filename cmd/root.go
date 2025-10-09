@@ -21,7 +21,7 @@ import (
 
 var (
 	cfgFile    string
-	out        output.Output
+	out        = output.New()
 	conf       *config.Config
 	cmdVersion string
 	cmdForce   bool

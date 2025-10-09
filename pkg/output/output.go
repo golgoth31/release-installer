@@ -1,63 +1,90 @@
-// Package output ...
 package output
 
 import (
-	"github.com/pterm/pterm"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
-// StepTitle string.
+// StepTitle prints a section title with the specified level.
 func (o *Output) StepTitle(str string, level int) {
-	pterm.DefaultSection.WithLevel(level).Println(str)
+	indent := strings.Repeat("  ", level-1)
+	styled := o.styles.Section.Render(fmt.Sprintf("%s%s", indent, str))
+	fmt.Fprintln(os.Stdout, styled)
 }
 
-// SuccessTitle string.
+// SuccessTitle prints a success title.
 func (o *Output) SuccessTitle(str string) {
-	pterm.DefaultSection.WithStyle(&pterm.ThemeDefault.SuccessMessageStyle).Print(str)
+	styled := o.styles.Success.Render(str)
+	fmt.Fprint(os.Stdout, styled)
 }
 
-// JumpLine string.
+// JumpLine prints a newline.
 func (o *Output) JumpLine() {
-	pterm.DefaultBasicText.Print("\n")
+	fmt.Fprint(os.Stdout, "\n")
 }
 
-// NoFormat string.
+// NoFormat prints text without any formatting.
 func (o *Output) NoFormat(str string) {
-	pterm.DefaultBasicText.Printf("%s\n", str)
+	fmt.Fprintf(os.Stdout, "%s\n", str)
 }
 
-// Info string.
+// Info prints an info message with a prefix.
 func (o *Output) Info(str string) {
-	pref := pterm.Prefix{
-		Text:  "\u00BB",
-		Style: &pterm.ThemeDefault.InfoPrefixStyle,
-	}
-	pterm.Info.WithPrefix(pref).Println(str)
+	prefix := o.styles.InfoPrefix.Render("»")
+	styled := o.styles.Info.Render(str)
+	fmt.Fprintf(os.Stdout, "%s %s\n", prefix, styled)
 }
 
-// Success string.
+// Success prints a success message with a prefix.
 func (o *Output) Success(str string) {
-	pref := pterm.Prefix{
-		Text:  "\u221A",
-		Style: &pterm.ThemeDefault.SuccessPrefixStyle,
-	}
-	pterm.Success.WithPrefix(pref).Println(str)
+	prefix := o.styles.SuccessPrefix.Render("✓")
+	styled := o.styles.Success.Render(str)
+	fmt.Fprintf(os.Stdout, "%s %s\n", prefix, styled)
 }
 
-// SuccessString string.
+// SuccessString returns a formatted success string without printing.
 func (o *Output) SuccessString(str string) string {
-	pref := pterm.Prefix{
-		Text:  "\u221A",
-		Style: &pterm.ThemeDefault.SuccessPrefixStyle,
-	}
-
-	return pterm.Success.WithPrefix(pref).Sprint(str)
+	prefix := o.styles.SuccessPrefix.Render("✓")
+	styled := o.styles.Success.Render(str)
+	return fmt.Sprintf("%s %s", prefix, styled)
 }
 
-// Warn string.
+// Warn prints a warning message with a prefix.
 func (o *Output) Warn(str string) {
-	pref := pterm.Prefix{
-		Text:  "\u26A0",
-		Style: &pterm.ThemeDefault.WarningPrefixStyle,
+	prefix := o.styles.WarningPrefix.Render("⚠")
+	styled := o.styles.Warning.Render(str)
+	fmt.Fprintf(os.Stdout, "%s %s\n", prefix, styled)
+}
+
+// Error prints an error message with a prefix.
+func (o *Output) Error(str string) {
+	prefix := o.styles.Error.Render("✗")
+	styled := o.styles.Error.Render(str)
+	fmt.Fprintf(os.Stdout, "%s %s\n", prefix, styled)
+}
+
+// Fatal prints a fatal error message and exits.
+func (o *Output) Fatal(str string) {
+	o.Error(str)
+	os.Exit(1)
+}
+
+// WithStyle applies a custom style to the output.
+func (o *Output) WithStyle(style lipgloss.Style) *Output {
+	return &Output{
+		styles: &Styles{
+			Section:       style,
+			Success:       o.styles.Success,
+			Info:          o.styles.Info,
+			Warning:       o.styles.Warning,
+			Error:         o.styles.Error,
+			Prefix:        o.styles.Prefix,
+			SuccessPrefix: o.styles.SuccessPrefix,
+			InfoPrefix:    o.styles.InfoPrefix,
+			WarningPrefix: o.styles.WarningPrefix,
+		},
 	}
-	pterm.Warning.WithPrefix(pref).Println(str)
 }

@@ -85,7 +85,7 @@ publish:
 clean:
 	rm -rf ri
 
-PROTOC_IMAGE := rvolosatovs/protoc:3.3.0
+PROTOC_IMAGE := docker.io/rvolosatovs/protoc:v6.0.1
 
 build_proto:
 	docker run --rm -v $$(pwd):$$(pwd) -w $$(pwd) $(PROTOC_IMAGE) -I. --go_out=${GOPATH}/src proto/*

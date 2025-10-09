@@ -16,7 +16,7 @@ import (
 
 var (
 	referenceData   *reference.Reference
-	out             output.Output
+	out             = output.New()
 	errUnknownMode  = errors.New("unknown release mode")
 	errUnknownArch  = errors.New("unknown arch")
 	errUnknownOs    = errors.New("unknown os")

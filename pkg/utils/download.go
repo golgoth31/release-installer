@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/go-getter"
 )
 
-var defaultProgressBar getter.ProgressTracker = &progressbar.ProgressBar{}
+var defaultProgressBar getter.ProgressTracker = progressbar.New()
 
 func Download(src, dst string, progress bool) error {
 	ctx, cancel := context.WithCancel(context.Background())

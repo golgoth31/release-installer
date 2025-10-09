@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-var out output.Output
+var out = output.New()
 
 func Migrate(homedir, version string, conf *config.Config) error {
 	if version == "" {

@@ -1,57 +1,215 @@
-// Package progressbar ...
 package progressbar
 
 import (
+	"fmt"
 	"io"
+	"os"
+	"strings"
+	"time"
 
-	"github.com/golgoth31/release-installer/pkg/output"
-	"github.com/vbauerster/mpb/v5"
-	"github.com/vbauerster/mpb/v5/decor"
+	"github.com/charmbracelet/bubbles/progress"
 )
 
-const pbWidth = 200
+// New creates a new ProgressBar instance.
+func New() *ProgressBar {
+	return &ProgressBar{}
+}
 
-var out *output.Output
-
-// TrackProgress generates a progress bar.
-func (cpb *ProgressBar) TrackProgress(
+// TrackProgress creates a progress tracker for file downloads.
+// This implements the getter.ProgressTracker interface.
+func (pb *ProgressBar) TrackProgress(
 	src string,
 	currentSize,
 	totalSize int64,
 	stream io.ReadCloser,
 ) io.ReadCloser {
-	cpb.lock.Lock()
-	defer cpb.lock.Unlock()
+	pb.mu.Lock()
+	defer pb.mu.Unlock()
 
-	pb := mpb.New(mpb.WithWidth(pbWidth))
-	// Parameters of the new progress bar
-	bar := pb.AddBar(totalSize,
-		mpb.PrependDecorators(
-			decor.OnComplete(
-				decor.Name(""), out.SuccessString(""),
-			),
-		),
-		mpb.AppendDecorators(
-			decor.Name(src),
-			decor.Name(" "),
-			decor.AverageSpeed(decor.UnitKB, "(% .2f)"),
-		),
-	)
+	// Create a progress model
+	prog := progress.New(progress.WithDefaultGradient())
+	prog.Width = 50
 
-	reader := bar.ProxyReader(stream)
+	// Create a progress reader
+	pr := &ProgressReader{
+		Reader:     stream,
+		progress:   prog,
+		total:      totalSize,
+		current:    currentSize,
+		lastUpdate: time.Now(),
+	}
 
-	return &readCloser{
-		Reader: reader,
-		close: func() error {
-			cpb.lock.Lock()
-			defer cpb.lock.Unlock()
+	return pr
+}
 
-			pb.Wait()
+// Read implements io.Reader interface and updates progress.
+func (pr *ProgressReader) Read(p []byte) (n int, err error) {
+	n, err = pr.Reader.Read(p)
 
-			return nil
-		},
+	pr.mu.Lock()
+	pr.current += int64(n)
+
+	// Update progress every 100ms to avoid too frequent updates
+	if time.Since(pr.lastUpdate) > 100*time.Millisecond {
+		pr.updateProgress()
+		pr.lastUpdate = time.Now()
+	}
+	pr.mu.Unlock()
+
+	return n, err
+}
+
+// Close implements io.Closer interface.
+func (pr *ProgressReader) Close() error {
+	pr.mu.Lock()
+	defer pr.mu.Unlock()
+
+	// Final progress update
+	pr.updateProgress()
+	fmt.Println() // New line after progress bar
+
+	if closer, ok := pr.Reader.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
+}
+
+// updateProgress renders the current progress.
+func (pr *ProgressReader) updateProgress() {
+	if pr.total <= 0 {
+		return
+	}
+
+	percent := float64(pr.current) / float64(pr.total)
+	pr.progress.SetPercent(percent)
+
+	// Create progress bar display
+	bar := pr.progress.View()
+
+	// Add file info
+	info := fmt.Sprintf(" %s", formatBytes(pr.current))
+	if pr.total > 0 {
+		info += fmt.Sprintf("/%s", formatBytes(pr.total))
+	}
+
+	// Add percentage
+	info += fmt.Sprintf(" (%.1f%%)", percent*100)
+
+	// Combine and display
+	display := bar + info
+	fmt.Printf("\r%s", display)
+	os.Stdout.Sync()
+}
+
+// NewWriter creates a progress writer for uploads or writes.
+func NewWriter(w io.Writer, total int64) *ProgressWriter {
+	prog := progress.New(progress.WithDefaultGradient())
+	prog.Width = 50
+
+	return &ProgressWriter{
+		Writer:     w,
+		progress:   prog,
+		total:      total,
+		current:    0,
+		lastUpdate: time.Now(),
 	}
 }
 
-// Close progressbar.
-func (c *readCloser) Close() error { return c.close() }
+// Write implements io.Writer interface and updates progress.
+func (pw *ProgressWriter) Write(p []byte) (n int, err error) {
+	n, err = pw.Writer.Write(p)
+
+	pw.mu.Lock()
+	pw.current += int64(n)
+
+	// Update progress every 100ms
+	if time.Since(pw.lastUpdate) > 100*time.Millisecond {
+		pw.updateProgress()
+		pw.lastUpdate = time.Now()
+	}
+	pw.mu.Unlock()
+
+	return n, err
+}
+
+// Close implements io.Closer interface.
+func (pw *ProgressWriter) Close() error {
+	pw.mu.Lock()
+	defer pw.mu.Unlock()
+
+	// Final progress update
+	pw.updateProgress()
+	fmt.Println() // New line after progress bar
+
+	if closer, ok := pw.Writer.(io.Closer); ok {
+		return closer.Close()
+	}
+	return nil
+}
+
+// updateProgress renders the current progress for writer.
+func (pw *ProgressWriter) updateProgress() {
+	if pw.total <= 0 {
+		return
+	}
+
+	percent := float64(pw.current) / float64(pw.total)
+	pw.progress.SetPercent(percent)
+
+	// Create progress bar display
+	bar := pw.progress.View()
+
+	// Add file info
+	info := fmt.Sprintf(" %s", formatBytes(pw.current))
+	if pw.total > 0 {
+		info += fmt.Sprintf("/%s", formatBytes(pw.total))
+	}
+
+	// Add percentage
+	info += fmt.Sprintf(" (%.1f%%)", percent*100)
+
+	// Combine and display
+	display := bar + info
+	fmt.Printf("\r%s", display)
+	os.Stdout.Sync()
+}
+
+// formatBytes formats bytes into human readable format.
+func formatBytes(bytes int64) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%d B", bytes)
+	}
+
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+
+	units := []string{"KB", "MB", "GB", "TB", "PB"}
+	if exp >= len(units) {
+		exp = len(units) - 1
+	}
+
+	return fmt.Sprintf("%.1f %s", float64(bytes)/float64(div), units[exp])
+}
+
+// SimpleProgress creates a simple progress display without bubbles.
+func SimpleProgress(current, total int64, label string) {
+	if total <= 0 {
+		return
+	}
+
+	percent := float64(current) / float64(total)
+	barWidth := 30
+	filled := int(float64(barWidth) * percent)
+
+	bar := strings.Repeat("=", filled) + strings.Repeat("_", barWidth-filled)
+
+	display := fmt.Sprintf("\r%s [%s] %.1f%% %s/%s",
+		label, bar, percent*100, formatBytes(current), formatBytes(total))
+
+	fmt.Print(display)
+	os.Stdout.Sync()
+}
