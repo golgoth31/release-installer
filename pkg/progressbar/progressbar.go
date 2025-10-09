@@ -26,9 +26,14 @@ func (pb *ProgressBar) TrackProgress(
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
 
-	// Create a progress model
-	prog := progress.New(progress.WithDefaultGradient())
-	prog.Width = 50
+	// Create a progress model with proper settings
+	prog := progress.New(
+		progress.WithDefaultGradient(),
+		progress.WithWidth(50),
+		progress.WithoutPercentage(),
+	)
+	// Initialize the progress bar
+	prog.SetPercent(0.0)
 
 	// Create a progress reader
 	pr := &ProgressReader{
@@ -83,8 +88,8 @@ func (pr *ProgressReader) updateProgress() {
 	percent := float64(pr.current) / float64(pr.total)
 	pr.progress.SetPercent(percent)
 
-	// Create progress bar display
-	bar := pr.progress.View()
+	// Create progress bar display - use simple bar for reliability
+	bar := createSimpleBar(percent, 50)
 
 	// Add file info
 	info := fmt.Sprintf(" %s", formatBytes(pr.current))
@@ -95,16 +100,21 @@ func (pr *ProgressReader) updateProgress() {
 	// Add percentage
 	info += fmt.Sprintf(" (%.1f%%)", percent*100)
 
-	// Combine and display
-	display := bar + info
-	fmt.Printf("\r%s", display)
+	// Combine and display - ensure we have enough space and clear the line
+	display := fmt.Sprintf("\r\033[K%s%s", bar, info)
+	fmt.Print(display)
 	os.Stdout.Sync()
 }
 
 // NewWriter creates a progress writer for uploads or writes.
 func NewWriter(w io.Writer, total int64) *ProgressWriter {
-	prog := progress.New(progress.WithDefaultGradient())
-	prog.Width = 50
+	prog := progress.New(
+		progress.WithDefaultGradient(),
+		progress.WithWidth(50),
+		progress.WithoutPercentage(),
+	)
+	// Initialize the progress bar
+	prog.SetPercent(0.0)
 
 	return &ProgressWriter{
 		Writer:     w,
@@ -156,8 +166,8 @@ func (pw *ProgressWriter) updateProgress() {
 	percent := float64(pw.current) / float64(pw.total)
 	pw.progress.SetPercent(percent)
 
-	// Create progress bar display
-	bar := pw.progress.View()
+	// Create progress bar display - use simple bar for reliability
+	bar := createSimpleBar(percent, 50)
 
 	// Add file info
 	info := fmt.Sprintf(" %s", formatBytes(pw.current))
@@ -168,10 +178,26 @@ func (pw *ProgressWriter) updateProgress() {
 	// Add percentage
 	info += fmt.Sprintf(" (%.1f%%)", percent*100)
 
-	// Combine and display
-	display := bar + info
-	fmt.Printf("\r%s", display)
+	// Combine and display - ensure we have enough space and clear the line
+	display := fmt.Sprintf("\r\033[K%s%s", bar, info)
+	fmt.Print(display)
 	os.Stdout.Sync()
+}
+
+// createSimpleBar creates a simple text-based progress bar.
+func createSimpleBar(percent float64, width int) string {
+	// Ensure percent is between 0 and 1
+	if percent < 0 {
+		percent = 0
+	}
+	if percent > 1 {
+		percent = 1
+	}
+
+	filled := int(float64(width) * percent)
+	// bar := strings.Repeat("█", filled) + strings.Repeat("░", width-filled)
+	bar := strings.Repeat("=", filled) + strings.Repeat("_", width-filled)
+	return fmt.Sprintf("[%s]", bar)
 }
 
 // formatBytes formats bytes into human readable format.
