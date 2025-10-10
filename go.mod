@@ -1,6 +1,6 @@
 module github.com/golgoth31/release-installer
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
@@ -8,6 +8,7 @@ require (
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/lipgloss v0.10.0
 	github.com/google/go-github/v32 v32.1.0
+	github.com/google/go-github/v75 v75.0.0
 	github.com/hashicorp/go-getter v1.8.2
 	github.com/logrusorgru/aurora/v3 v3.0.0
 	github.com/mitchellh/go-homedir v1.1.0
@@ -58,7 +59,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
