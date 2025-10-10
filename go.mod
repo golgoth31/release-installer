@@ -10,6 +10,7 @@ require (
 	github.com/google/go-github/v32 v32.1.0
 	github.com/hashicorp/go-getter v1.8.2
 	github.com/logrusorgru/aurora/v3 v3.0.0
+	github.com/logrusorgru/aurora/v4 v4.0.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo/v2 v2.26.0
 	github.com/onsi/gomega v1.38.2
