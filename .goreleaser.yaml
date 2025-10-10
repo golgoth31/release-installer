@@ -1,17 +1,20 @@
-env:
-  - GO111MODULE=on
-  - CGO_ENABLED=0
-  - GO_MODULENAME=github.com/golgoth31/release-installer
+version: 2
+
 before:
   hooks:
     - go mod download
+
 builds:
-  - goarch:
+  - env:
+      - GO111MODULE=on
+      - CGO_ENABLED=0
+      - GO_MODULENAME=github.com/golgoth31/release-installer
+    goos:
+      - linux
+      - darwin
+    goarch:
       - amd64
       - arm64
-      - arm
-    goarm:
-      - 7
     binary: ri
     ldflags:
       - -s
@@ -19,13 +22,12 @@ builds:
       - -X "{{.Env.GO_MODULENAME}}/configs.Version={{.Tag}}"
       - -X "{{.Env.GO_MODULENAME}}/configs.Date={{.Date}}"
       - -X "{{.Env.GO_MODULENAME}}/configs.BuiltBy=goreleaser"
+
 archives:
-  - format: binary
+  - formats:
+      - binary
     name_template: "{{ .Binary }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
-checksum:
-  name_template: "ri_{{ .Tag }}_SHA256SUMS.txt"
-snapshot:
-  name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
@@ -33,3 +35,8 @@ changelog:
       - "^docs:"
       - "^test:"
       - "^Merge branch"
+
+checksum:
+  name_template: "ri_{{ .Tag }}_SHA256SUMS.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
